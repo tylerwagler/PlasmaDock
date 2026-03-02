@@ -576,8 +576,8 @@ PlasmoidItem {
 
                 // 1. Definimos propiedades para animar los laterales
                 // Si hay zoom, restamos un valor (ej. 20px) para que el fondo se extienda
-                property int dynamicLeftMargin: tasks.isZoomActive ? (tasks.skinParams.outLeft - 26) : tasks.skinParams.outLeft
-                property int dynamicRightMargin: tasks.isZoomActive ? (tasks.skinParams.outRight - 26) : tasks.skinParams.outRight
+                property int dynamicLeftMargin: tasks.isZoomActive ? (tasks.skinParams.outLeft - 27) : tasks.skinParams.outLeft
+                property int dynamicRightMargin: tasks.isZoomActive ? (tasks.skinParams.outRight - 27) : tasks.skinParams.outRight
 
                 anchors {
                     fill: parent
@@ -646,7 +646,7 @@ PlasmoidItem {
                 id: taskList
 
 
-                width: taskRepeater.count * (Plasmoid.configuration.iconSize +  12)  // 10 menos que la  altura del panel
+                width: Math.ceil(taskRepeater.count * (Plasmoid.configuration.iconSize +  14))  // 10 menos que la  altura del panel
                 height: tasks.height
 
                 // 2. Calculamos el ancho real de todos los iconos sumados
