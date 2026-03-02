@@ -1,5 +1,6 @@
 # org.kde.plasma.wavetask
 Task manager with OSX-style zoom. It's based on the default task manager of KDE 6.6.
+
 Since Plasma 6.6 does not allow direct access to the task manager library, the plugin has had to be compiled, so the installation is no longer just a matter of copying but requires compilation.
 
 ## Support for previous Plasma releases
