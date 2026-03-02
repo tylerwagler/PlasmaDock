@@ -4,7 +4,8 @@ Since Plasma 6.6 does not allow direct access to the task manager library, the p
 
 ## Support for previous Plasma releases
 
-Currently supported versions: 6.6
+Currently supported versions: 6.6.
+
 If you need to install it on Plasma 6.5 or lower, I recommend you do it from here: https://github.com/vickoc911/org.kde.plasma.wavetask
 
 ## Packages
