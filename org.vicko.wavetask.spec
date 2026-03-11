@@ -35,6 +35,7 @@ BuildRequires:  plasma-workspace-devel
 
 BuildRequires:  libksysguard-devel
 BuildRequires:  kwin-devel
+BuildRequires:  libepoxy-devel
 
 BuildRequires:  cmake(LibTaskManager)
 BuildRequires:  cmake(LibNotificationManager)
