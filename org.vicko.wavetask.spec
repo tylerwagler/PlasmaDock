@@ -27,6 +27,7 @@ BuildRequires:  kf6-kconfigwidgets-devel
 BuildRequires:  kf6-knotifications-devel
 BuildRequires:  kf6-kio-devel
 BuildRequires:  kf6-kcoreaddons-devel
+BuildRequires:  kf6-kitemmodels-devel
 
 BuildRequires:  libplasma-devel
 BuildRequires:  plasma-activities-devel
