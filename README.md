@@ -10,6 +10,7 @@ Currently supported versions: 6.6.
 If you need to install it on Plasma 6.5 or lower, I recommend you do it from here: https://github.com/vickoc911/org.kde.plasma.wavetask
 
 ## Packages
+
 <details>
   <summary>openSUSE Tumbleweed</summary>
   <br>
@@ -18,6 +19,15 @@ If you need to install it on Plasma 6.5 or lower, I recommend you do it from her
   sudo zypper ar https://download.opensuse.org/repositories/home:/vcalles/openSUSE_Tumbleweed/home:vcalles.repo
   sudo zypper refresh
   sudo zypper install wavetask
+  ```
+</details>
+<details>
+  <summary>Fedora 43, 42 (copr)</summary>
+  <br>
+  
+  ```sh
+  sudo dnf copr enable vcalles/wavetask 
+  sudo dnf install wavetask
   ```
 </details>
 
