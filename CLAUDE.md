@@ -38,15 +38,13 @@ No automated test framework is configured. Testing is manual: build, install, re
 
 **QML Frontend** (`package/contents/ui/`): The UI layer.
 
-- `main.qml` — Root plasmoid. Manages skin system, panel rotation (180° for bottom panels).
+- `main.qml` — Root plasmoid. Handles panel transparency, zoom state tracking, panel rotation.
 - `Task.qml` — Individual task delegate with zoom animation, mouse events, tooltips.
 - `TaskList.qml` — Task list container using Repeater.
 - `ContextMenu.qml` — Right-click context menu with recent/frequent actions.
 - `ToolTipInstance.qml` — Task preview tooltips.
 - `ConfigAppearance.qml` / `ConfigBehavior.qml` — Settings panels.
 - `code/LayoutMetrics.js`, `code/TaskTools.js` — Sizing calculations and task utilities.
-
-**Skins** (`package/contents/skins/`): Visual themes (Big Sur Light/Night, Coffee, IVORY Glass, Vidrio, Default).
 
 **Layout Templates** (`layout-templates/`): Pre-configured panel layouts.
 

@@ -35,15 +35,11 @@ After installing the package, you just need to add the panel for wavetask
 
 ## Features:
 
-- Zoom like in macOS
-- Icon mirroring
-- Basic skin system
-- Option to select the icon size
-- option to select the zoom size
-
-What doesn't work:
-- For now, it only works in the bottom position
-- The panel has been resized to 76 pixels so that icons aren't cut off when zooming
+- macOS-style dock zoom effect
+- Icon mirroring (reflection)
+- Configurable icon size and zoom percentage
+- Smart launcher badges and progress indicators
+- KDE Activities integration
 
 ### ☕ Buy Me a Coffee!
 
