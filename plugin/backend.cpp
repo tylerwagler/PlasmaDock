@@ -64,9 +64,7 @@ Backend::Backend(QObject *parent)
             });
 }
 
-Backend::~Backend()
-{
-}
+Backend::~Backend() = default;
 
 QUrl Backend::tryDecodeApplicationsUrl(const QUrl &launcherUrl)
 {
