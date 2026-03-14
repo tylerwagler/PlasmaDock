@@ -85,48 +85,37 @@ PlasmaCore.ToolTipArea {
     location: Plasmoid.location
     mainItem: !Plasmoid.configuration.showToolTips || !model.IsWindow ? pinnedAppToolTipDelegate : openWindowToolTipDelegate
 
-    // y hace que el panel se expanda elásticamente.
     width: Plasmoid.configuration.iconSize
     height: tasksRoot.height
 
-    // Desactivamos el recorte para que el zoom y el reflejo "vuelen" fuera
+    // Disable clipping so zoom and reflection can extend outside bounds
     clip: false
 
-    // Esta propiedad la activamos desde el MouseArea del main.qml
     property bool isHovered: false
 
-    property Item dockRef: null // Esto recibirá el 'dockMouseArea' de main.qml
+    property Item dockRef: null
 
     readonly property real _baseSize: Plasmoid.configuration.iconSize
     readonly property real _sigma: _baseSize * 1.8
     readonly property real _amplitude: (Plasmoid.configuration.magnification || 0) / 100
 
-    // ---------------------------------------------------------
-    // INICIO DEL CÓDIGO ZOOM (OSX EFFECT)
-    // ---------------------------------------------------------
-
+    // macOS-style zoom effect using Gaussian curve
     property real zoomFactor: {
-        // Guardias de seguridad básicas
         if (!dockRef || _amplitude <= 0) return 1.0;
-
         if (!dockRef.insideDock) return 1.0;
 
         let mX = dockRef.smoothMouseX;
         if (mX < 0) return 1.0;
 
-        // Distancia del mouse al centro del icono
         let centerInDock = task.mapToItem(dockRef, _baseSize / 2, 0).x;
         let distance = Math.abs(mX - centerInDock);
 
-        // Si el mouse está muy lejos, no escalamos
         if (distance > _sigma * 3) return 1.0;
 
-        // Curva tipo Gauss para suavizado estilo Mac
-        //  return 1.0 + _amplitude * Math.exp(-Math.pow(distance / 1.2, 2) / (2 * Math.pow(_sigma, 2)));
         return 1.0 + _amplitude * Math.exp(-(Math.pow(distance, 2) / (2 * Math.pow(_sigma, 2))));
     }
 
-    // Mantenemos el Behavior para que la transición al salir del dock sea suave
+    // Smooth transition when mouse leaves the dock
     Behavior on zoomFactor {
         NumberAnimation {
             duration: 200
@@ -523,15 +512,14 @@ PlasmaCore.ToolTipArea {
         anchors.verticalCenterOffset: -5
         anchors.bottomMargin: 0
 
-        // Mantenemos el contenedor con un tamaño fijo
         width: Plasmoid.configuration.iconSize
         height: Plasmoid.configuration.iconSize
 
-        // El zoom se aplica solo como transformación visual al contenedor completo
+        // Zoom is applied as a visual-only scale transform
         scale: zoomFactor
         transformOrigin: Item.Bottom
 
-        z: highlighted ? 100 : 1 // Asegura que el icono activo esté arriba pero no bloquee eventos
+        z: highlighted ? 100 : 1
 
         asynchronous: true
         active: task.smartLauncherItem && task.smartLauncherItem.countVisible
@@ -559,7 +547,6 @@ PlasmaCore.ToolTipArea {
             implicitWidth: width
             implicitHeight: height
 
-            // usamos para asegurar rendimiento
             smooth: true
             antialiasing: true
             source: model.decoration
@@ -591,15 +578,13 @@ PlasmaCore.ToolTipArea {
             }
         ]
 
-        // Reflejo de iconos optimizado
+        // Icon reflection
         Item {
             id: reflectionContainer
-            // El reflejo nace de la base del icono fijo
             anchors.top: icon.bottom
             anchors.horizontalCenter: icon.horizontalCenter
             anchors.horizontalCenterOffset: -4
 
-            // Tamaño fijo para el reflejo
             width: Plasmoid.configuration.iconSize
             height: Plasmoid.configuration.iconSize / 2
             clip: true
@@ -611,7 +596,6 @@ PlasmaCore.ToolTipArea {
                 id: reflectionIcon
                 width: Plasmoid.configuration.iconSize
                 height: Plasmoid.configuration.iconSize
-                // Usamos el mismo source con caché
                 source: icon.source
                 // cache: true
                 active: icon.active
