@@ -258,9 +258,9 @@ QVariantList Backend::placesActions(const QUrl &launcherUrl, bool showAllPlaces,
             // but at that time the underlying surface has already been created where setting this
             // flag makes no difference anymore (Bug 385311)
             subMenu->setAttribute(Qt::WA_TranslucentBackground);
-            // Cannot parent a QMenu to a QAction, need to delete it manually.
-            connect(parent, &QObject::destroyed, subMenu, &QObject::deleteLater);
             subMenuAction->setMenu(subMenu);
+            // QMenu can't be parented to a QAction; tie its lifetime to the action.
+            connect(subMenuAction, &QObject::destroyed, subMenu, &QObject::deleteLater);
 
             actions << QVariant::fromValue(subMenuAction);
 
