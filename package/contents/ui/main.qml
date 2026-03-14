@@ -49,17 +49,15 @@ PlasmoidItem {
 
   //  Plasmoid.constraintHints: Plasmoid.CanFillArea
 
-  // --- LÓGICA DE TRANSPARENCIA ---
+  // --- Transparency logic ---
   property Item containmentItem: null
   readonly property int depth: 14
   property bool isBackgroundDisabled: true
 
   function lookForContainer(object, tries) {
       if (tries === 0 || object === null) return;
-      // Esta es la línea clave que dijiste que funciona
       if (object.toString().indexOf("ContainmentItem_QML") > -1) {
           tasks.containmentItem = object;
-          console.log("Contenedor encontrado en el intento: " + (depth - tries));
       } else {
           lookForContainer(object.parent, tries - 1);
       }
@@ -69,14 +67,11 @@ PlasmoidItem {
       if (tasks.containmentItem === null) lookForContainer(tasks.parent, depth);
       if (tasks.containmentItem === null) return;
 
-      // Aplicamos el NoBackground (0) o Default (1)
       tasks.containmentItem.Plasmoid.backgroundHints = (isBackgroundDisabled) ? 0 : 1;
-
-      // También lo aplicamos al objeto raíz por si acaso
       tasks.Plasmoid.backgroundHints = (isBackgroundDisabled) ? 0 : 1;
   }
 
-  // --- LÓGICA DE SKINS ---
+  // --- Skin logic ---
   property int topoutimage: 0
   property var skinParams: ({
       image: "", imagetask: "",
@@ -86,10 +81,7 @@ PlasmoidItem {
 
   function loadSkinConfig() {
       let skinName = Plasmoid.configuration.skinName || "default";
-      // Construimos la ruta al nuevo archivo Config.qml
       let configUrl = Qt.resolvedUrl("../skins/" + skinName + "/Config.qml");
-
-      console.log("Cargando configuración de skin desde: " + configUrl);
 
       let component = Qt.createComponent(configUrl);
 
@@ -100,12 +92,11 @@ PlasmoidItem {
       }
 
       if (component.status === Component.Ready) {
-          let config = component.createObject(tasks); // 'tasks' es el id de tu PlasmoidItem
+          let config = component.createObject(tasks);
 
           if (config) {
               let skinFolderUrl = Qt.resolvedUrl("../skins/" + skinName + "/").toString();
 
-              // Actualizamos skinParams de forma reactiva
               tasks.skinParams = {
                   image: skinFolderUrl + config.image,
                   imagetask: skinFolderUrl + config.imagetask,
@@ -119,22 +110,18 @@ PlasmoidItem {
                   outBottom: config.outsideBottomMargin
               };
 
-              console.log("EXITO: Skin '" + skinName + "' cargada. Imagen: " + tasks.skinParams.image);
-
-              // Limpiamos el objeto temporal de memoria
               config.destroy();
           }
       } else {
-          console.log("ERROR al cargar Config.qml: " + component.errorString());
-          // Fallback: Si no existe el .qml, podrías intentar cargar valores por defecto aquí
+          console.warn("Failed to load skin Config.qml: " + component.errorString());
       }
   }
 
-  // Detecta si entra zoom y si sale
+  // Tracks whether any task is currently zoomed
   readonly property bool isZoomActive: {
       for (let i = 0; i < taskRepeater.count; ++i) {
           let item = taskRepeater.itemAt(i);
-          // Si el zoomFactor es mayor a 1.0 (o un umbral mínimo como 1.01)
+          // Check if zoomFactor exceeds threshold
           if (item && item.zoomFactor > 1.01) return true;
       }
       return false;
@@ -421,8 +408,7 @@ PlasmoidItem {
             target: Plasmoid.configuration
 
             function onSkinNameChanged() {
-                console.log("Nueva skin detectada: " + Plasmoid.configuration.skinName);
-                loadSkinConfig(); // La función que lee el .ini y carga la imagen
+                loadSkinConfig();
             }
 
             function onIconSizeChanged() {
@@ -508,64 +494,59 @@ PlasmoidItem {
             sourceComponent: (Plasmoid.configuration.skinName === "default") ? defaultSkin : customSkin
         }
 
-        // --- Componente 1: DEFAULT (SVG) ---
+        // --- Default skin (SVG) ---
         Component {
             id: defaultSkin
             Item {
                 id: internalCanvas
 
-                // Definimos cuánto queremos que crezca el fondo lateralmente
+                // How much the background expands laterally during zoom
                 readonly property int expansionAmount: tasks.isZoomActive ? 74 : 0
 
-                // 2. CAPA DE FONDO
+                // Background layer
                 KSvg.FrameSvgItem {
                     id: backgroundItem
                     imagePath: "widgets/panel-background"
                     prefix: ""
                     z: -1
 
-                    // Altura (Tu lógica original)
                     height: (Plasmoid.configuration.iconSize < 48) ? taskList.height - (shadowItem.margins.top + 6) : taskList.height - (shadowItem.margins.top - 4)
                     y: (Plasmoid.configuration.iconSize < 48) ? shadowItem.margins.top + 6 : shadowItem.margins.top - 4
 
-                    // --- ANCHO Y POSICIÓN DINÁMICA ---
+                    // Dynamic width and position
                     width: (taskList.width - 56) + internalCanvas.expansionAmount
                     x: 28 - (internalCanvas.expansionAmount / 2)
 
-                    // Animaciones para suavizar el estiramiento
                     Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
                     Behavior on x { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
 
-                    // Respetamos los hints del SVG
                     anchors.leftMargin: shadowItem.margins.left
                     anchors.topMargin: shadowItem.margins.top
                     anchors.rightMargin: shadowItem.margins.right
                     anchors.bottomMargin: shadowItem.margins.bottom
                 }
 
-                // 1. CAPA DE SOMBRA
+                // Shadow layer
                 KSvg.FrameSvgItem {
                     id: shadowItem
                     imagePath: "widgets/panel-background"
                     prefix: "shadow"
                     z: -2
 
-                    // Altura (Tu lógica original)
                     height: (Plasmoid.configuration.iconSize < 48) ? taskList.height + (shadowItem.margins.top - 6) : taskList.height + (shadowItem.margins.top + 4)
                     y: (Plasmoid.configuration.iconSize < 48) ? 6 : -4
 
-                    // --- ANCHO Y POSICIÓN DE SOMBRA DINÁMICA ---
+                    // Dynamic shadow width and position
                     width: (taskList.width - 32) + internalCanvas.expansionAmount
                     x: 16 - (internalCanvas.expansionAmount / 2)
 
-                    // Animaciones para que la sombra siga al fondo suavemente
                     Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
                     Behavior on x { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
                 }
             }
         }
 
-        // --- Componente 2: CUSTOM (Imagen) ---
+        // --- Custom skin (image) ---
         Component {
             id: customSkin
             BorderImage {
@@ -574,8 +555,7 @@ PlasmoidItem {
                 visible: source.toString() !== ""
                 opacity: 1.0
 
-                // 1. Definimos propiedades para animar los laterales
-                // Si hay zoom, restamos un valor (ej. 20px) para que el fondo se extienda
+                // Margins shrink during zoom to extend the background
                 property int dynamicLeftMargin: tasks.isZoomActive ? (tasks.skinParams.outLeft - 27) : tasks.skinParams.outLeft
                 property int dynamicRightMargin: tasks.isZoomActive ? (tasks.skinParams.outRight - 27) : tasks.skinParams.outRight
 
@@ -584,12 +564,10 @@ PlasmoidItem {
                     topMargin: tasks.skinParams.outTop
                     bottomMargin: tasks.skinParams.outBottom
 
-                    // 2. Vinculamos las anclas a nuestras propiedades dinámicas
                     leftMargin: dockBackground.dynamicLeftMargin
                     rightMargin: dockBackground.dynamicRightMargin
                 }
 
-                // 3. Animamos ambos márgenes para un efecto suave de expansión
                 Behavior on dynamicLeftMargin {
                     NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
                 }
@@ -646,10 +624,10 @@ PlasmoidItem {
                 id: taskList
 
 
-                width: Math.ceil(taskRepeater.count * (Plasmoid.configuration.iconSize +  14))  // 10 menos que la  altura del panel
+                width: Math.ceil(taskRepeater.count * (Plasmoid.configuration.iconSize + 14))
                 height: tasks.height
 
-                // 2. Calculamos el ancho real de todos los iconos sumados
+                // Total width of all icons for centering
                 readonly property real iconsTotalWidth: {
                     let total = 0;
                     for (let i = 0; i < taskRepeater.count; ++i) {
@@ -659,7 +637,7 @@ PlasmoidItem {
                     return total;
                 }
 
-                // 3. El desplazamiento necesario para centrar el bloque
+                // Offset needed to center the icon block
                 readonly property real centerOffset: (width - iconsTotalWidth) / 2
 
                 Layout.maximumWidth: width
@@ -679,27 +657,24 @@ PlasmoidItem {
 
                 Item {
                     id: dockContainer
-                    // El contenedor ahora es un área estática que llena el filtro
                     anchors.fill: parent
 
-                    // 1. Este es el MouseArea que detecta el movimiento en todo el dock
+                    // MouseArea for detecting mouse movement across the dock
                     MouseArea {
                         id: dockMouseArea
                         anchors.fill: parent
                         hoverEnabled: true
                         acceptedButtons: Qt.NoButton
 
-                        // Posición suavizada del mouse
                         property real smoothMouseX: -1
                         property bool insideDock: false
 
-                        // Suavizado de movimiento para evitar parpadeos
+                        // Lerp smoothing to avoid flickering
                         onPositionChanged: (mouse) => {
                             let mappedPos = mapToItem(tasks, mouse.x, mouse.y);
                             if (smoothMouseX < 0) {
                                 smoothMouseX = mappedPos.x;
                             } else {
-                                // Suavizado tipo “lerp” para movimiento fluido
                                 smoothMouseX = smoothMouseX + (mappedPos.x - smoothMouseX) * 0.3;
                             }
                             insideDock = true;
@@ -734,15 +709,12 @@ PlasmoidItem {
                             delegate: Task {
                                 id: taskItem
                                 tasksRoot: tasks
-                                // Pasamos la referencia si es necesario
                                 dockRef: dockMouseArea
 
                                 x: {
-                                    let posX = taskList.centerOffset; // Empezamos en el centro calculado
+                                    let posX = taskList.centerOffset;
                                     for (let i = 0; i < index; ++i) {
                                         let previousItem = taskRepeater.itemAt(i);
-                                        // Si el item anterior existe, sumamos su ancho.
-                                        // Si no, sumamos el ancho base estimado (60) para que no se encimen.
                                         posX += (previousItem ? previousItem.width : 60);
                                     }
                                     return posX;
@@ -817,7 +789,6 @@ PlasmoidItem {
         TaskTools.taskManagerInstanceCount += 1;
         requestLayout.connect(iconGeometryTimer.restart);
         applyBackgroundHint();
-        // --- CARGAR SKIN AL INICIAR ---
         loadSkinConfig();
     }
 
@@ -825,22 +796,21 @@ PlasmoidItem {
         TaskTools.taskManagerInstanceCount -= 1;
     }
 
-    // para hacer panel transparente
+    // Retry timer for applying transparent panel background
     Timer {
         id: initializeAppletTimer
         interval: 1200
-        repeat: false // Lo hacemos repetir hasta que encuentre el contenedor
+        repeat: false
         running: true
 
         property int step: 0
         readonly property int maxStep: 5
 
         onTriggered: {
-            console.log("Intento de transparencia número: " + (step + 1));
             applyBackgroundHint();
 
             if (tasks.containmentItem !== null || step >= maxStep) {
-                stop(); // Se detiene cuando lo logra o alcanza el límite
+                stop();
             }
             step++;
         }
