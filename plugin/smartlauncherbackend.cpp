@@ -183,19 +183,6 @@ void Backend::update(const QString &uri, const QMap<QString, QVariant> &properti
 
     auto propertiesEnd = properties.constEnd();
 
-    auto foundCount = properties.constFind(QStringLiteral("count"));
-    if (foundCount != propertiesEnd) {
-        qint64 newCount = foundCount->toLongLong();
-        // 2 billion unread emails ought to be enough for anybody
-        if (newCount < std::numeric_limits<int>::max()) {
-            int saneCount = static_cast<int>(newCount);
-            if (saneCount != foundEntry->count) {
-                foundEntry->count = saneCount;
-                Q_EMIT countChanged(storageId, saneCount);
-            }
-        }
-    }
-
     updateLauncherProperty(storageId, properties, QStringLiteral("count"), &foundEntry->count, &Backend::count, &Backend::countChanged);
     updateLauncherProperty(storageId,
                            properties,
