@@ -452,12 +452,9 @@ PlasmaCore.ToolTipArea {
             rightMargin: ((task.inPopup || task.tasksRoot.vertical) && taskList.columns > 1) ? LayoutMetrics.iconMargin : 0
         }
 
-        imagePath: tasks.skinParams.imagetask
         property bool isHovered: task.highlighted && Plasmoid.configuration.taskHoverEffect
         property string basePrefix: "normal"
         prefix: isHovered ? TaskTools.taskPrefixHovered(basePrefix, Plasmoid.location) : TaskTools.taskPrefix(basePrefix, Plasmoid.location)
-
-   //     prefix: isHovered ? TaskTools.taskPrefixHovered(basePrefix, Plasmoid.location) : TaskTools.taskPrefix(basePrefix, Plasmoid.location)
 
         // Avoid repositioning delegate item after dragFinished
         DragHandler {
@@ -524,7 +521,6 @@ PlasmaCore.ToolTipArea {
         width: Plasmoid.configuration.iconSize
         height: Plasmoid.configuration.iconSize
 
-        // Zoom is applied as a visual-only scale transform
         scale: zoomFactor
         transformOrigin: Item.Bottom
 
@@ -552,9 +548,6 @@ PlasmaCore.ToolTipArea {
             id: icon
             width: Plasmoid.configuration.iconSize
             height: Plasmoid.configuration.iconSize
-
-            implicitWidth: width
-            implicitHeight: height
 
             smooth: true
             antialiasing: true
@@ -606,7 +599,6 @@ PlasmaCore.ToolTipArea {
                 width: Plasmoid.configuration.iconSize
                 height: Plasmoid.configuration.iconSize
                 source: icon.source
-                // cache: true
                 active: icon.active
                 smooth: true
 
