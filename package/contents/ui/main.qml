@@ -56,7 +56,8 @@ PlasmoidItem {
 
   function lookForContainer(object, tries) {
       if (tries === 0 || object === null) return;
-      if (object.toString().indexOf("ContainmentItem_QML") > -1) {
+      // Check for a containment by looking for Plasmoid.backgroundHints property
+      if (object.Plasmoid && object.Plasmoid.backgroundHints !== undefined && object !== tasks) {
           tasks.containmentItem = object;
       } else {
           lookForContainer(object.parent, tries - 1);
