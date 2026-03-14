@@ -1,10 +1,11 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: wavetask
-Upstream-Contact: Victor Calles <victor.calles@gmail.com>
+Upstream-Contact: Tyler Wagler <tyler.wagler@elytrondefense.com>
 Source: https://github.com/vickoc911/org.vicko.wavetask
 
 Files: *
-Copyright: 2024-2026 Victor Calles <victor.calles@gmail.com>
+Copyright: 2024-2026 Tyler Wagler <tyler.wagler@elytrondefense.com>
+           2024 Victor Calles <victor.calles@gmail.com>
 License: GPL-2.0-or-later
 
 License: GPL-2.0-or-later

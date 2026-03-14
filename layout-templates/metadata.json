@@ -3,17 +3,21 @@
     "KPlugin": {
         "Authors": [
             {
-                "Email": "davidedmundson@kde.org",
-                "Name": "David Edmundson"
+                "Email": "tyler.wagler@elytrondefense.com",
+                "Name": "Tyler Wagler"
+            },
+            {
+                "Email": "victor.calles@gmail.com",
+                "Name": "Victor Calles"
             }
         ],
         "Category": "",
-        "Description": "panel for plasmoid wavetask",
+        "Description": "Panel layout for WaveTask",
         "EnabledByDefault": true,
         "Id": "org.vicko.wavetask.panel",
-        "License": "LGPLv2+",
-        "Name": "panel for plasmoid wavetask",
-        "Website": "https://www.kde.org/plasma-desktop"
+        "License": "GPL-2.0-or-later",
+        "Name": "WaveTask Panel",
+        "Website": "https://github.com/vickoc911/org.vicko.wavetask"
     },
     "X-Plasma-ContainmentCategories": [
         "panel"

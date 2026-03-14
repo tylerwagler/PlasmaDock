@@ -3,19 +3,22 @@
     "KPlugin": {
         "Authors": [
             {
+                "Email": "tyler.wagler@elytrondefense.com",
+                "Name": "Tyler Wagler"
+            },
+            {
                 "Email": "victor.calles@gmail.com",
                 "Name": "Victor Calles"
             }
         ],
-        "BugReportUrl": "https://bugs.kde.org/enter_bug.cgi?product=plasmashell&component=Task%20Manager%20and%20Icons-Only%20Task%20Manager%20widgets",
         "Category": "Windows and Tasks",
-        "Description": "Wave Task Manager like osx",
+        "Description": "Wave Task Manager with macOS-style dock zoom",
         "EnabledByDefault": true,
         "Icon": "preferences-system-windows",
         "Id": "org.vicko.wavetask",
-        "License": "GPL-2.0+",
+        "License": "GPL-2.0-or-later",
         "Name": "Wave Task Manager",
-        "Website": "https://userbase.kde.org/Plasma/Tasks"
+        "Website": "https://github.com/vickoc911/org.vicko.wavetask"
     },
     "X-Plasma-API-Minimum-Version": "6.0",
     "X-Plasma-Provides": [

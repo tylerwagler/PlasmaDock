@@ -74,5 +74,8 @@ export CXXFLAGS="%{optflags} -I%{_vpath_builddir}/plugin"
 %{_datadir}/plasma/layout-templates/org.vicko.wavetask.panel/
 
 %changelog
+* Sat Mar 14 2026 Tyler Wagler <tyler.wagler@elytrondefense.com> - 6.6.0-2
+- Strip skin system, fix clipping, comprehensive code audit
+
 * Wed Mar 11 2026 Victor Calles - 6.6.0-1
 - Initial COPR build

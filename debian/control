@@ -1,7 +1,7 @@
 Source: wavetask
 Section: kde
 Priority: optional
-Maintainer: Victor Calles <victor.calles@gmail.com>
+Maintainer: Tyler Wagler <tyler.wagler@elytrondefense.com>
 Build-Depends:
  debhelper-compat (= 13),
  cmake (>= 3.27),
@@ -37,5 +37,5 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Plasma 6 task manager with macOS-style zoom
  WaveTask is a Plasma 6 task manager applet with macOS-style dock zoom
- animation, icon mirroring, and multiple visual skins. It integrates with
- KDE Activities and supports smart launcher badges and progress indicators.
+ animation and icon mirroring. It integrates with KDE Activities and
+ supports smart launcher badges and progress indicators.
