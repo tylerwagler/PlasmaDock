@@ -11,7 +11,6 @@
 #include <QObject>
 #include <QRect>
 
-#include <netwm.h>
 #include <qqmlregistration.h>
 #include <qwindowdefs.h>
 
@@ -22,11 +21,6 @@ class QActionGroup;
 class QQuickItem;
 class QQuickWindow;
 class QJsonArray;
-
-namespace KActivities
-{
-class Consumer;
-}
 
 class Backend : public QObject
 {
@@ -74,7 +68,6 @@ private:
     QVariantList systemSettingsActions(QObject *parent) const;
 
     QActionGroup *m_actionGroup = nullptr;
-    KActivities::Consumer *m_activitiesConsumer = nullptr;
 
     KActivityManagerdPluginsSettings m_activityManagerPluginsSettings;
     KConfigWatcher::Ptr m_activityManagerPluginsSettingsWatcher;
