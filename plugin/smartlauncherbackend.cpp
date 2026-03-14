@@ -145,7 +145,9 @@ QHash<QString, QString> Backend::unityMappingRules() const
 
 void Backend::update(const QString &uri, const QMap<QString, QVariant> &properties)
 {
-    Q_ASSERT(calledFromDBus());
+    if (!calledFromDBus()) {
+        return;
+    }
 
     QString storageId;
 
