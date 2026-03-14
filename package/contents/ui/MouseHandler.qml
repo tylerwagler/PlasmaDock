@@ -13,7 +13,7 @@ import "code/TaskTools.js" as TaskTools
 
 DropArea {
     id: dropArea
-    signal urlsDropped(var urls)
+    signal urlsDropped(list<url> urls)
 
     property Item target
     property Item ignoredItem

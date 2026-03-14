@@ -193,7 +193,7 @@ PlasmoidItem {
         return DBus.SessionBus.asyncCall({service: "org.kde.KWin.Effect.WindowView1", path: "/org/kde/KWin/Effect/WindowView1", iface: "org.kde.KWin.Effect.WindowView1", member: "activate", arguments: [winIds.map(s => String(s))], signature: "(as)"});
     }
 
-    function publishIconGeometries(taskItems: /*list<Item>*/var): void {
+    function publishIconGeometries(taskItems: var): void {
         if (TaskTools.taskManagerInstanceCount >= 2) {
             return;
         }
@@ -268,7 +268,7 @@ PlasmoidItem {
             Plasmoid.configuration.groupingLauncherUrlBlacklist = groupingLauncherUrlBlacklist;
         }
 
-        function sortModeEnumValue(index: int): /*TaskManager.TasksModel.SortMode*/ int {
+        function sortModeEnumValue(index: int): int {
             switch (index) {
             case 0:
                 return TaskManager.TasksModel.SortDisabled;
@@ -288,7 +288,7 @@ PlasmoidItem {
             }
         }
 
-        function groupModeEnumValue(index: int): /*TaskManager.TasksModel.GroupMode*/ int {
+        function groupModeEnumValue(index: int): int {
             switch (index) {
             case 0:
                 return TaskManager.TasksModel.GroupDisabled;
@@ -746,12 +746,7 @@ PlasmoidItem {
     }
 
     // This is called by plasmashell in response to a Meta+number shortcut.
-    // TODO: Change type to int
-    function activateTaskAtIndex(index: var): void {
-        if (typeof index !== "number") {
-            return;
-        }
-
+    function activateTaskAtIndex(index: int): void {
         const task = taskRepeater.itemAt(index) as Task;
         if (task) {
             TaskTools.activateTask(task.modelIndex(), task.model, null, task, Plasmoid, this, effectWatcher.registered);

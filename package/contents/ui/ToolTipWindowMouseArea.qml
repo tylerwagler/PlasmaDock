@@ -11,8 +11,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 
 MouseArea {
-    required property /*QModelIndex*/var modelIndex
-    required property /*undefined|WId where WId = int|string*/ var winId
+    required property var modelIndex // QModelIndex from C++
+    required property var winId // WId (int|string) or undefined
     required property Task rootTask
 
     acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton

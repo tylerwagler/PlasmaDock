@@ -269,7 +269,7 @@ PlasmaCore.ToolTipArea {
         }
     }
 
-    function modelIndex(): /*QModelIndex*/ var {
+    function modelIndex(): var { // returns QModelIndex
         return inPopup
             ? tasksModel.makeModelIndex(groupDialog.visualParent.index, index)
             : tasksModel.makeModelIndex(index);

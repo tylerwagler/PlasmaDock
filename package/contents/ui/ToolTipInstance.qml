@@ -26,12 +26,12 @@ ColumnLayout {
 
     required property var model
     required property int index
-    required property /*QModelIndex*/ var submodelIndex
+    required property var submodelIndex // QModelIndex from C++
     required property int appPid
     required property string display
     required property bool isMinimized
     required property bool isOnAllVirtualDesktops
-    required property /*list<var>*/ var virtualDesktops // Can't use list<var> because of QTBUG-127600
+    required property var virtualDesktops // Can't use list<var> because of QTBUG-127600
     required property list<string> activities
 
     property bool hasTrackInATitle: false

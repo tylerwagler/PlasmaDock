@@ -23,7 +23,7 @@ PlasmaExtras.Menu {
 
     required property TaskManagerApplet.Backend backend
     required property Mpris.Mpris2Model mpris2Source
-    required property /*QModelIndex*/var modelIndex
+    required property var modelIndex // QModelIndex from C++
 
     readonly property var atm: TaskManager.AbstractTasksModel
 
