@@ -7,6 +7,7 @@
 #pragma once
 
 #include <QObject>
+#include <QPointer>
 #include <QUrl>
 #include <QWeakPointer>
 #include <qqmlregistration.h>

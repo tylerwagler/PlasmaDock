@@ -36,45 +36,54 @@ void Item::init()
         return;
     }
 
-    connect(m_backendPtr.get(), &Backend::reloadRequested, this, [this](const QString &uri) {
-        if (uri.isEmpty() || m_storageId == uri) {
-            populate();
+    QPointer<Item> guard(this);
+
+    connect(m_backendPtr.get(), &Backend::reloadRequested, this, [guard](const QString &uri) {
+        if (!guard) return;
+        if (uri.isEmpty() || guard->m_storageId == uri) {
+            guard->populate();
         }
     });
 
-    connect(m_backendPtr.get(), &Backend::launcherRemoved, this, [this](const QString &uri) {
-        if (uri.isEmpty() || m_storageId == uri) {
-            clear();
+    connect(m_backendPtr.get(), &Backend::launcherRemoved, this, [guard](const QString &uri) {
+        if (!guard) return;
+        if (uri.isEmpty() || guard->m_storageId == uri) {
+            guard->clear();
         }
     });
 
-    connect(m_backendPtr.get(), &Backend::countChanged, this, [this](const QString &uri, int count) {
-        if (uri.isEmpty() || m_storageId == uri) {
-            setCount(count);
+    connect(m_backendPtr.get(), &Backend::countChanged, this, [guard](const QString &uri, int count) {
+        if (!guard) return;
+        if (uri.isEmpty() || guard->m_storageId == uri) {
+            guard->setCount(count);
         }
     });
 
-    connect(m_backendPtr.get(), &Backend::countVisibleChanged, this, [this](const QString &uri, bool countVisible) {
-        if (uri.isEmpty() || m_storageId == uri) {
-            setCountVisible(countVisible);
+    connect(m_backendPtr.get(), &Backend::countVisibleChanged, this, [guard](const QString &uri, bool countVisible) {
+        if (!guard) return;
+        if (uri.isEmpty() || guard->m_storageId == uri) {
+            guard->setCountVisible(countVisible);
         }
     });
 
-    connect(m_backendPtr.get(), &Backend::progressChanged, this, [this](const QString &uri, int progress) {
-        if (uri.isEmpty() || m_storageId == uri) {
-            setProgress(progress);
+    connect(m_backendPtr.get(), &Backend::progressChanged, this, [guard](const QString &uri, int progress) {
+        if (!guard) return;
+        if (uri.isEmpty() || guard->m_storageId == uri) {
+            guard->setProgress(progress);
         }
     });
 
-    connect(m_backendPtr.get(), &Backend::progressVisibleChanged, this, [this](const QString &uri, bool progressVisible) {
-        if (uri.isEmpty() || m_storageId == uri) {
-            setProgressVisible(progressVisible);
+    connect(m_backendPtr.get(), &Backend::progressVisibleChanged, this, [guard](const QString &uri, bool progressVisible) {
+        if (!guard) return;
+        if (uri.isEmpty() || guard->m_storageId == uri) {
+            guard->setProgressVisible(progressVisible);
         }
     });
 
-    connect(m_backendPtr.get(), &Backend::urgentChanged, this, [this](const QString &uri, bool urgent) {
-        if (uri.isEmpty() || m_storageId == uri) {
-            setUrgent(urgent);
+    connect(m_backendPtr.get(), &Backend::urgentChanged, this, [guard](const QString &uri, bool urgent) {
+        if (!guard) return;
+        if (uri.isEmpty() || guard->m_storageId == uri) {
+            guard->setUrgent(urgent);
         }
     });
 
