@@ -1,0 +1,5 @@
+wavetask (6.6.0-1) unstable; urgency=medium
+
+  * Initial Debian packaging.
+
+ -- Victor Calles <victor.calles@gmail.com>  Sat, 14 Mar 2026 00:00:00 +0000
