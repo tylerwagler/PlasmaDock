@@ -9,18 +9,22 @@
 #include <KDesktopFile>
 #include <KService>
 
+#include <mutex>
+
 #include "log_settings.h"
 
 using namespace SmartLauncher;
 
+static std::mutex s_backendMutex;
+
 Item::Item(QObject *parent)
     : QObject(parent)
 {
+    std::lock_guard<std::mutex> lock(s_backendMutex);
     m_backendPtr = s_backend.lock();
     if (!m_backendPtr) {
-        auto ptr = std::make_shared<Backend>();
-        s_backend = ptr;
-        m_backendPtr = s_backend.lock();
+        m_backendPtr = std::make_shared<Backend>();
+        s_backend = m_backendPtr;
     }
 }
 
