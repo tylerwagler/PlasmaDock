@@ -216,7 +216,7 @@ QVariantList Backend::placesActions(const QUrl &launcherUrl, bool showAllPlaces,
     QString previousGroup;
     QMenu *subMenu = nullptr;
 
-    std::unique_ptr<KFilePlacesModel> placesModel(new KFilePlacesModel());
+    auto placesModel = std::make_unique<KFilePlacesModel>();
     for (int i = 0; i < placesModel->rowCount(); ++i) {
         QModelIndex idx = placesModel->index(i, 0);
 
