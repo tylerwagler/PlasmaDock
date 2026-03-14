@@ -117,15 +117,9 @@ PlasmoidItem {
       }
   }
 
-  // Tracks whether any task is currently zoomed
-  readonly property bool isZoomActive: {
-      for (let i = 0; i < taskRepeater.count; ++i) {
-          let item = taskRepeater.itemAt(i);
-          // Check if zoomFactor exceeds threshold
-          if (item && item.zoomFactor > 1.01) return true;
-      }
-      return false;
-  }
+  // Counter of tasks currently zoomed; avoids iterating all tasks
+  property int zoomedTaskCount: 0
+  readonly property bool isZoomActive: zoomedTaskCount > 0
 
     Plasmoid.onUserConfiguringChanged: {
         if (Plasmoid.userConfiguring && groupDialog !== null) {

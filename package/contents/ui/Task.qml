@@ -115,6 +115,15 @@ PlasmaCore.ToolTipArea {
         return 1.0 + _amplitude * Math.exp(-(Math.pow(distance, 2) / (2 * Math.pow(_sigma, 2))));
     }
 
+    property bool _wasZoomed: false
+    onZoomFactorChanged: {
+        let zoomed = zoomFactor > 1.01;
+        if (zoomed !== _wasZoomed) {
+            _wasZoomed = zoomed;
+            tasksRoot.zoomedTaskCount += zoomed ? 1 : -1;
+        }
+    }
+
     // Smooth transition when mouse leaves the dock
     Behavior on zoomFactor {
         NumberAnimation {
@@ -705,5 +714,8 @@ PlasmaCore.ToolTipArea {
         completed = true;
     }
     Component.onDestruction: {
+        if (_wasZoomed) {
+            tasksRoot.zoomedTaskCount -= 1;
+        }
     }
 }
