@@ -12,7 +12,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects as GE
+import QtQuick.Effects
 
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
@@ -319,13 +319,13 @@ ColumnLayout {
             visible: active
             anchors.fill: pipeWireLoader.active ? pipeWireLoader : thumbnailLoader
 
-            sourceComponent: GE.DropShadow {
-                horizontalOffset: 0
-                verticalOffset: 3
-                radius: 8
-                samples: Math.round(radius * 1.5)
-                color: "Black"
-                source: pipeWireLoader.active ? pipeWireLoader.item : thumbnailLoader.item // source could be undefined when albumArt is available, so put it in a Loader.
+            sourceComponent: MultiEffect {
+                source: pipeWireLoader.active ? pipeWireLoader.item : thumbnailLoader.item
+                shadowEnabled: true
+                shadowHorizontalOffset: 0
+                shadowVerticalOffset: 3
+                shadowBlur: 0.5
+                shadowColor: "Black"
             }
         }
 
@@ -348,10 +348,12 @@ ColumnLayout {
                 height: Math.round(source.paintedHeight * scaleFactor)
                 layer.enabled: true
                 opacity: 0.25
-                layer.effect: GE.FastBlur {
+                layer.effect: MultiEffect {
                     source: albumArtBackground
                     anchors.fill: source
-                    radius: 30
+                    blurEnabled: true
+                    blurMax: 30
+                    blur: 1.0
                 }
             }
         }
