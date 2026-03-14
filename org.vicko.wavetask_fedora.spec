@@ -5,7 +5,7 @@ Version:        6.6.0
 Release:        1%{?dist}
 Summary:        Reusable Qt6 QML Task Manager Plugin for Plasma 6
 
-License:        GPL-3.0-only
+License:        GPL-2.0-or-later
 URL:            https://github.com/vickoc911/org.vicko.wavetask
 Source0:        %{url}/archive/refs/heads/main.tar.gz#/%{name}-%{version}.tar.gz
 
