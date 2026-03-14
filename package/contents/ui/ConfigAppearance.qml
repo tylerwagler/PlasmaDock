@@ -6,7 +6,7 @@
 
 import QtQuick
 import QtQuick.Controls as QQC2
-import Qt.labs.folderlistmodel // Importante para listar las carpetas de skins
+import Qt.labs.folderlistmodel
 
 import org.kde.kcmutils as KCMUtils
 import org.kde.kirigami as Kirigami
@@ -121,7 +121,6 @@ KCMUtils.SimpleKCM {
                 stepSize: 2
                 snapMode: QQC2.Slider.SnapOnRelease
 
-                // El valor inicial vendrá de la configuración de Plasma
                 value: Plasmoid.configuration.iconSize || 44
             }
 
@@ -132,7 +131,7 @@ KCMUtils.SimpleKCM {
                 Layout.preferredWidth: Kirigami.Units.gridUnit * 2
             }
         }
-        // --- Selector de Tamaño de Zoom ---
+        // Zoom percentage selector
         RowLayout {
             Kirigami.FormData.label: "Zoom Percentage:"
             spacing: Kirigami.Units.smallSpacing
@@ -144,7 +143,6 @@ KCMUtils.SimpleKCM {
                 to: 100
                 stepSize: 5
                 snapMode: QQC2.Slider.SnapOnRelease
-                // El valor inicial viene de la configuración (ej: 90% -> 0.9)
                 value: Plasmoid.configuration.magnification || 50
             }
             QQC2.Label {
