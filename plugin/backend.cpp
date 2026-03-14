@@ -274,12 +274,14 @@ QVariantList Backend::placesActions(const QUrl &launcherUrl, bool showAllPlaces,
         }
     }
 
-    // There is nothing more frustrating than having a "More" entry that ends up showing just one or two
-    // additional entries. Therefore we truncate to max. 5 entries only if there are more than 7 in total.
-    if (!showAllPlaces && actions.count() > 7) {
+    // Truncate to maxVisiblePlaces only if there are more than maxTotalBeforeTruncation in total.
+    // Avoids a "More" entry that shows just one or two additional items.
+    static constexpr int maxVisiblePlaces = 5;
+    static constexpr int maxTotalBeforeTruncation = 7;
+    if (!showAllPlaces && actions.count() > maxTotalBeforeTruncation) {
         const int totalActionCount = actions.count();
 
-        while (actions.count() > 5) {
+        while (actions.count() > maxVisiblePlaces) {
             actions.removeLast();
         }
 
