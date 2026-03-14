@@ -215,7 +215,7 @@ PlasmoidItem {
         if (TaskTools.taskManagerInstanceCount >= 2) {
             return;
         }
-        for (let i = 0; i < taskItems.length - 1; ++i) {
+        for (let i = 0; i < taskItems.length; ++i) {
             const task = taskItems[i];
 
             if (!task.model.IsLauncher && !task.model.IsStartup) {

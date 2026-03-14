@@ -42,7 +42,7 @@ function activateNextPrevTask(anchor, next, wheelSkipMinimized, wheelEnabled, ta
     let taskIndexList = [];
     const activeTaskIndex = tasks.tasksModel.activeTask;
 
-    for (let i = 0; i < tasks.taskList.children.length - 1; ++i) {
+    for (let i = 0; i < tasks.taskList.children.length; ++i) {
         const task = tasks.taskList.children[i];
         const modelIndex = task.modelIndex(i);
 
