@@ -36,6 +36,10 @@ PlasmoidItem {
     readonly property bool vertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
     readonly property bool iconsOnly: Plasmoid.pluginName === "org.vicko.wavetask"
 
+    // Magic number constants for spacing and layout
+    readonly property int panelZoomPadding: 14
+    readonly property int reflectionAllowance: Plasmoid.configuration.iconSize / 2 + 10
+
     property Task toolTipOpenedByClick
     property Task toolTipAreaItem
 
@@ -71,8 +75,8 @@ PlasmoidItem {
       ensurePanelFitsZoom();
   }
 
-  function ensurePanelFitsZoom() {
-      let neededHeight = maxZoomedHeight + 14;
+   function ensurePanelFitsZoom() {
+       let neededHeight = maxZoomedHeight + panelZoomPadding;
 
       // Try to resize the panel window to fit zoomed icons
       let win = tasks.Window.window;
@@ -117,7 +121,7 @@ PlasmoidItem {
         }
         if (!vertical) {
             // Request enough height for zoomed icons + reflection
-            return maxZoomedHeight + Plasmoid.configuration.iconSize / 2 + 10;
+            return maxZoomedHeight + reflectionAllowance;
         }
         return LayoutMetrics.preferredMinHeight();
     }
@@ -139,7 +143,7 @@ PlasmoidItem {
             return taskList.Layout.maximumHeight
         }
         // Request enough height for zoomed icons + reflection
-        return maxZoomedHeight + Plasmoid.configuration.iconSize / 2 + 10;
+        return maxZoomedHeight + reflectionAllowance;
     }
 
     property Item dragSource
@@ -272,6 +276,8 @@ PlasmoidItem {
                 return TaskManager.TasksModel.GroupDisabled;
             case 1:
                 return TaskManager.TasksModel.GroupApplications;
+            default:
+                return TaskManager.TasksModel.GroupDisabled;
             }
         }
 
@@ -479,7 +485,7 @@ PlasmoidItem {
                 // Extra width to prevent side clipping when edge icons zoom
                 readonly property real zoomOverflow: Plasmoid.configuration.iconSize * (Plasmoid.configuration.magnification / 100)
 
-                width: Math.ceil(taskRepeater.count * (Plasmoid.configuration.iconSize + 14)) + zoomOverflow
+                width: Math.ceil(taskRepeater.count * (Plasmoid.configuration.iconSize + panelZoomPadding)) + zoomOverflow
                 height: tasks.height
 
                 // Total width of all icons for centering

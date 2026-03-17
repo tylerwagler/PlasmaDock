@@ -95,9 +95,13 @@ PlasmaCore.ToolTipArea {
 
     property Item dockRef: null
 
+    // Magic number constants for task layout and zoom
     readonly property real _baseSize: Plasmoid.configuration.iconSize
     readonly property real _sigma: _baseSize * 1.8
     readonly property real _amplitude: Plasmoid.configuration.magnification / 100
+    readonly property int _taskWidthPadding: 6
+    readonly property int _iconBottomOffset: -5
+    readonly property int _reflectionHorizontalOffset: -4
 
     // macOS-style zoom effect using Gaussian curve
     property real zoomFactor: {
@@ -515,7 +519,7 @@ PlasmaCore.ToolTipArea {
 
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenterOffset: -5
+        anchors.verticalCenterOffset: _iconBottomOffset
         anchors.bottomMargin: 0
 
         width: Plasmoid.configuration.iconSize
@@ -585,7 +589,7 @@ PlasmaCore.ToolTipArea {
             id: reflectionContainer
             anchors.top: icon.bottom
             anchors.horizontalCenter: icon.horizontalCenter
-            anchors.horizontalCenterOffset: -4
+            anchors.horizontalCenterOffset: _reflectionHorizontalOffset
 
             width: Plasmoid.configuration.iconSize
             height: Plasmoid.configuration.iconSize / 2
