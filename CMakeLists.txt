@@ -1,7 +1,7 @@
 
 cmake_minimum_required(VERSION 3.27)
 
-project(wavetask)
+project(plasmadock)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -26,8 +26,8 @@ find_package(Plasma ${KF6_MIN_VERSION} REQUIRED)
 find_package(PlasmaActivities ${KF6_MIN_VERSION} REQUIRED)
 
 add_subdirectory(plugin)
-plasma_install_package(package org.vicko.wavetask)
+plasma_install_package(package org.vicko.plasmadock)
 install(DIRECTORY layout-templates/
-        DESTINATION ${KDE_INSTALL_DATADIR}/plasma/layout-templates/org.vicko.wavetask.panel
+        DESTINATION ${KDE_INSTALL_DATADIR}/plasma/layout-templates/org.vicko.plasmadock.panel
 )
 

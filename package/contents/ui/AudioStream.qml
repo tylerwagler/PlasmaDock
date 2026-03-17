@@ -19,8 +19,8 @@ Item {
     anchors {
         top: frame.top
         right: frame.right
-        rightMargin: taskFrame.margins.right
-        topMargin: Math.round(taskFrame.margins.top * indicatorScale)
+        rightMargin: frame.margins.right
+        topMargin: Math.round(frame.margins.top * indicatorScale)
     }
 
     readonly property real indicatorScale: 1.2
@@ -137,7 +137,7 @@ Item {
                 when: tasks.vertical && frame.width < audioStreamIcon.requiredSpace
 
                 PropertyChanges {
-                    audioStreamIconBox.anchors.rightMargin: Math.round(taskFrame.margins.right * indicatorScale)
+                    audioStreamIconBox.anchors.rightMargin: Math.round(frame.margins.right * indicatorScale)
                 }
             },
 
@@ -171,7 +171,7 @@ Item {
                 }
 
                 PropertyChanges {
-                    audioStreamIconBox.anchors.topMargin: taskFrame.margins.top
+                    audioStreamIconBox.anchors.topMargin: frame.margins.top
                     audioStreamIconBox.width: Kirigami.Units.iconSizes.roundedIconSize(Math.min(Math.min(iconBox.width, iconBox.height), Kirigami.Units.iconSizes.smallMedium))
                     audioStreamIcon.height: audioStreamIcon.parent.height
                     audioStreamIcon.width: audioStreamIcon.parent.width

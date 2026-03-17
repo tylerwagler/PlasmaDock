@@ -31,7 +31,7 @@ find_package(KSysGuard REQUIRED)
 # -------------------------------------------------
 # 2. Sources
 # -------------------------------------------------
-set(wavetask_source
+set(plasmadock_source
     plugin.cpp
     backend.cpp
     backend.h
@@ -41,11 +41,11 @@ set(wavetask_source
     smartlauncheritem.h
 )
 
-ecm_qt_declare_logging_category(wavetask_LOG_SRCS
+ecm_qt_declare_logging_category(plasmadock_LOG_SRCS
     HEADER log_settings.h
-    IDENTIFIER WAVETASK_DEBUG
-    CATEGORY_NAME org.vicko.wavetask
-    DESCRIPTION "WaveTask plugin"
+    IDENTIFIER PLASMADOCK_DEBUG
+    CATEGORY_NAME org.vicko.plasmadock
+    DESCRIPTION "PlasmaDock plugin"
 )
 
 # -------------------------------------------------
@@ -56,36 +56,36 @@ qt_policy(SET QTP0001 NEW)
 # -------------------------------------------------
 # 4. KConfig generated files
 # -------------------------------------------------
-kconfig_add_kcfg_files(wavetask_source
+kconfig_add_kcfg_files(plasmadock_source
     kactivitymanagerd_plugins_settings.kcfgc
 )
 
-add_library(wavetask SHARED ${wavetask_source} ${wavetask_LOG_SRCS})
-set_target_properties(wavetask PROPERTIES
+add_library(plasmadock SHARED ${plasmadock_source} ${plasmadock_LOG_SRCS})
+set_target_properties(plasmadock PROPERTIES
     AUTOMOC ON
     AUTOUIC ON
     AUTORCC ON
 )
 
-qt_add_qml_module(wavetask
-    URI org.vicko.wavetask
+qt_add_qml_module(plasmadock
+    URI org.vicko.plasmadock
     VERSION 1.0
 )
 
 # -------------------------------------------------
 # 5. Properties and Linking
 # -------------------------------------------------
-set_target_properties(wavetask PROPERTIES
-    OUTPUT_NAME "wavetaskplugin"
+set_target_properties(plasmadock PROPERTIES
+    OUTPUT_NAME "plasmadockplugin"
     PREFIX "lib"
 )
 
-target_include_directories(wavetask PRIVATE
+target_include_directories(plasmadock PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-target_link_libraries(wavetask
+target_link_libraries(plasmadock
     PRIVATE
         Qt6::Core Qt6::DBus Qt6::Qml Qt6::Quick Qt6::Widgets
         KF6::CoreAddons KF6::I18n KF6::Service KF6::WindowSystem
@@ -101,9 +101,9 @@ target_link_libraries(wavetask
 # -------------------------------------------------
 # 6. Installation
 # -------------------------------------------------
-install(TARGETS wavetask DESTINATION ${KDE_INSTALL_QMLDIR}/org/vicko/wavetask)
+install(TARGETS plasmadock DESTINATION ${KDE_INSTALL_QMLDIR}/org/vicko/plasmadock)
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/qmldir
-    ${CMAKE_CURRENT_BINARY_DIR}/wavetask.qmltypes
-    DESTINATION ${KDE_INSTALL_QMLDIR}/org/vicko/wavetask
+    ${CMAKE_CURRENT_BINARY_DIR}/plasmadock.qmltypes
+    DESTINATION ${KDE_INSTALL_QMLDIR}/org/vicko/plasmadock
 )

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-WaveTask is a KDE Plasma 6 task manager applet with macOS-style dock zoom animation. Built with C++23, Qt 6.4+, and KDE Frameworks 6.0+. Targets Plasma 6.6+.
+PlasmaDock is a KDE Plasma 6 task manager applet with macOS-style dock zoom animation. Built with C++23, Qt 6.4+, and KDE Frameworks 6.0+. Targets Plasma 6.6+.
 
 ## Build Commands
 
@@ -19,7 +19,7 @@ make -j$(nproc)
 make install DESTDIR=$(pwd)/install
 
 # Iterative dev: copy rebuilt plugin
-cp plugin/libwavetaskplugin.so ~/.local/lib/qt6/qml/org/vicko/wavetask/
+cp plugin/libplasmadockplugin.so ~/.local/lib/qt6/qml/org/vicko/plasmadock/
 
 # Reload to test changes
 plasmashell --replace
@@ -29,7 +29,7 @@ No automated test framework is configured. Testing is manual: build, install, re
 
 ## Architecture
 
-**C++ Plugin** (`plugin/`): Compiled as `libwavetaskplugin.so`, registered as a Qt6 QML module (`org.vicko.wavetask`).
+**C++ Plugin** (`plugin/`): Compiled as `libplasmadockplugin.so`, registered as a Qt6 QML module (`org.vicko.plasmadock`).
 
 - `backend.h/cpp` — Core task manager logic. Handles jump list actions, places, recent documents, KActivities integration. Exposed to QML via `QML_ELEMENT`.
 - `smartlauncherbackend.h/cpp` — Monitors D-Bus for app badge counts, progress bars, and urgency flags. Integrates with NotificationManager and Unity Launcher API.
@@ -64,7 +64,7 @@ Qt6 (Core, DBus, Qml, Quick, Widgets), KF6 (CoreAddons, I18n, Service, WindowSys
 
 ## Packaging
 
-- **Fedora**: RPM spec at `org.vicko.wavetask_fedora.spec`, published via COPR.
+- **Fedora**: RPM spec at `org.vicko.plasmadock_fedora.spec`, published via COPR.
 - **Debian/Ubuntu**: Packaging in `debian/`. Build with `dpkg-buildpackage -us -uc` or `debuild`.
 
 ## Build Dependencies (install if missing)

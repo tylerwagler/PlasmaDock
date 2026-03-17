@@ -17,7 +17,7 @@ import org.kde.kirigami as Kirigami
 import org.kde.plasma.workspace.trianglemousefilter
 
 import org.kde.taskmanager as TaskManager
-import org.vicko.wavetask as TaskManagerApplet
+import org.vicko.plasmadock as TaskManagerApplet
 import org.kde.plasma.workspace.dbus as DBus
 
 import "code/LayoutMetrics.js" as LayoutMetrics
@@ -34,7 +34,7 @@ PlasmoidItem {
 
     readonly property bool shouldShrinkToZero: tasksModel.count === 0
     readonly property bool vertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
-    readonly property bool iconsOnly: Plasmoid.pluginName === "org.vicko.wavetask"
+    readonly property bool iconsOnly: Plasmoid.pluginName === "org.vicko.plasmadock"
 
     // Magic number constants for spacing and layout
     readonly property int panelZoomPadding: 14

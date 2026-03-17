@@ -15,7 +15,7 @@ import org.kde.ksvg as KSvg
 import org.kde.plasma.extras as PlasmaExtras
 import org.kde.plasma.components as PlasmaComponents3
 import org.kde.kirigami as Kirigami
-import org.vicko.wavetask as TaskManagerApplet
+import org.vicko.plasmadock as TaskManagerApplet
 import org.kde.plasma.plasmoid
 
 import "code/LayoutMetrics.js" as LayoutMetrics
@@ -225,7 +225,7 @@ PlasmaCore.ToolTipArea {
 
     onSmartLauncherEnabledChanged: {
         if (smartLauncherEnabled && !smartLauncherItem) {
-            const component = Qt.createComponent("org.vicko.wavetask", "SmartLauncherItem");
+            const component = Qt.createComponent("org.vicko.plasmadock", "SmartLauncherItem");
             const smartLauncher = component.createObject(task);
             component.destroy();
 

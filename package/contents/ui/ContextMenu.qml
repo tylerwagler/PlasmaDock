@@ -14,7 +14,7 @@ import org.kde.plasma.extras as PlasmaExtras
 
 import org.kde.taskmanager as TaskManager
 import org.kde.plasma.private.mpris as Mpris
-import org.vicko.wavetask as TaskManagerApplet
+import org.vicko.plasmadock as TaskManagerApplet
 
 import "code/LayoutMetrics.js" as LayoutMetrics
 

@@ -12,13 +12,13 @@
             }
         ],
         "Category": "Windows and Tasks",
-        "Description": "Wave Task Manager with macOS-style dock zoom",
+        "Description": "PlasmaDock: Task manager with macOS-style dock zoom",
         "EnabledByDefault": true,
         "Icon": "preferences-system-windows",
-        "Id": "org.vicko.wavetask",
+        "Id": "org.vicko.plasmadock",
         "License": "GPL-2.0-or-later",
-        "Name": "Wave Task Manager",
-        "Website": "https://github.com/vickoc911/org.vicko.wavetask"
+        "Name": "PlasmaDock",
+        "Website": "https://github.com/vickoc911/org.vicko.plasmadock"
     },
     "X-Plasma-API-Minimum-Version": "6.0",
     "X-Plasma-Provides": [

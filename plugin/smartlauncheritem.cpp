@@ -200,7 +200,7 @@ void Item::setProgress(int progress)
     int boundedProgress = std::clamp(progress, 0, 100);
 
     if (progress != boundedProgress) {
-        qCDebug(WAVETASK_DEBUG).nospace() << qUtf8Printable(m_launcherUrl.toString()) << ": Progress value " << progress << " is out of bounds!";
+        qCDebug(PLASMADOCK_DEBUG).nospace() << qUtf8Printable(m_launcherUrl.toString()) << ": Progress value " << progress << " is out of bounds!";
     }
 
     if (m_progress != boundedProgress) {

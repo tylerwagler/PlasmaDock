@@ -1,6 +1,6 @@
 var panel = new Panel();
 panel.location = "bottom";
-panel.height = 76;
+panel.height = 100;
 
 // Content sizing
 panel.lengthMode = 1; // FitContent
