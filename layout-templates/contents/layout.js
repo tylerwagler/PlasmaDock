@@ -21,7 +21,7 @@ for (var i = 0; i < currentWidgets.length; i++) {
     currentWidgets[i].remove();
 }
 
-// Add the task manager widget
-panel.addWidget("org.plasmadock");
+// Add Konsole launcher
+panel.addWidget("org.kde.konsole");
 
 panel.reloadConfig();
