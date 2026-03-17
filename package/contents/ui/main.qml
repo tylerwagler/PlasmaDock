@@ -488,14 +488,22 @@ PlasmoidItem {
                 width: Math.ceil(taskRepeater.count * (Plasmoid.configuration.iconSize + panelZoomPadding)) + zoomOverflow
                 height: tasks.height
 
-                // Total width of all icons for centering
-                readonly property real iconsTotalWidth: {
-                    let total = 0;
+                // Precomputed cumulative X offsets for O(1) task positioning
+                // Updated whenever any task width changes
+                property var taskOffsets: {
+                    let offsets = [centerOffset];
                     for (let i = 0; i < taskRepeater.count; ++i) {
                         let item = taskRepeater.itemAt(i);
-                        if (item) total += item.width;
+                        let w = item ? item.width : Plasmoid.configuration.iconSize;
+                        offsets.push(offsets[offsets.length - 1] + w);
                     }
-                    return total;
+                    return offsets;
+                }
+
+                // Total width of all icons for centering (derived from offsets)
+                readonly property real iconsTotalWidth: {
+                    let offsets = taskOffsets;
+                    return offsets.length > 1 ? offsets[offsets.length - 1] - offsets[0] : 0;
                 }
 
                 // Offset needed to center the icon block
@@ -572,14 +580,7 @@ PlasmoidItem {
                                 tasksRoot: tasks
                                 dockRef: dockMouseArea
 
-                                x: {
-                                    let posX = taskList.centerOffset;
-                                    for (let i = 0; i < index; ++i) {
-                                        let previousItem = taskRepeater.itemAt(i);
-                                        posX += (previousItem ? previousItem.width : 60);
-                                    }
-                                    return posX;
-                                }
+                                x: taskList.taskOffsets[index] ?? taskList.centerOffset
 
                                 width: (Plasmoid.configuration.iconSize * zoomFactor) + 6
                             }
