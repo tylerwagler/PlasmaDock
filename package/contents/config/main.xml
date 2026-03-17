@@ -163,6 +163,10 @@
       <min>0</min>
       <max>100</max>
     </entry>
+    <entry name="showReflection" type="Bool">
+      <label>Whether to show a reflection of the icon below the dock.</label>
+      <default>true</default>
+    </entry>
   </group>
 
 </kcfg>

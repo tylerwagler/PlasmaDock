@@ -38,7 +38,8 @@ PlasmoidItem {
 
     // Magic number constants for spacing and layout
     readonly property int panelZoomPadding: 14
-    readonly property int reflectionAllowance: Plasmoid.configuration.iconSize / 2 + 10
+    readonly property int reflectionAllowance: Plasmoid.configuration.showReflection
+        ? Plasmoid.configuration.iconSize / 2 + 10 : 0
 
     property Task toolTipOpenedByClick
     property Task toolTipAreaItem

@@ -32,6 +32,7 @@ KCMUtils.SimpleKCM {
     property int cfg_iconSpacing: 0
     property alias cfg_iconSize: iconSizeSlider.value
     property alias cfg_magnification: magnificationSlider.value
+    property alias cfg_showReflection: showReflection.checked
 
     Component.onCompleted: {
         /* Don't rely on bindings for checking the radiobuttons
@@ -91,6 +92,12 @@ KCMUtils.SimpleKCM {
                 color: Kirigami.Theme.disabledTextColor
                 Layout.preferredWidth: Kirigami.Units.gridUnit * 2
             }
+        }
+
+        QQC2.CheckBox {
+            id: showReflection
+            Kirigami.FormData.label: i18nc("@label", "Effects:")
+            text: i18nc("@option:check", "Show icon reflection below dock")
         }
 
         QQC2.CheckBox {
