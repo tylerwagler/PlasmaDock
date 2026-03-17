@@ -1,7 +1,7 @@
 /*
     SPDX-FileCopyrightText: 2020 Tranter Madi <trmdi@yandex.com>
 
-    SPDX-License-Identifier: LGPL-2.0-or-later
+    SPDX-License-Identifier: GPL-2.0-or-later
 */
 
 pragma ComponentBehavior: Bound
