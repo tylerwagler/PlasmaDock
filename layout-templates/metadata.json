@@ -12,11 +12,11 @@
             }
         ],
         "Category": "",
-        "Description": "Panel layout for WaveTask",
+        "Description": "Dock layout for Plasma",
         "EnabledByDefault": true,
         "Id": "org.vicko.wavetask.panel",
         "License": "GPL-2.0-or-later",
-        "Name": "WaveTask Panel",
+        "Name": "Plasma Dock",
         "Website": "https://github.com/vickoc911/org.vicko.wavetask"
     },
     "X-Plasma-ContainmentCategories": [
