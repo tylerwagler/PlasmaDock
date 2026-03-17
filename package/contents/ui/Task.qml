@@ -539,7 +539,8 @@ PlasmaCore.ToolTipArea {
                 return margin;
             }
 
-            var margins = isVertical ? LayoutMetrics.horizontalMargins() : LayoutMetrics.verticalMargins();
+            // LayoutMetrics.horizontalMargins() and verticalMargins() removed (always 0)
+            var margins = 0;
 
             if ((size - margins) < Kirigami.Units.iconSizes.small) {
                 return Math.ceil((margin * (Kirigami.Units.iconSizes.small / size)) / 2);
