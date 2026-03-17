@@ -60,7 +60,7 @@ No automated test framework is configured. Testing is manual: build, install, re
 
 ## Key Dependencies
 
-Qt6 (Core, DBus, Qml, Quick, Widgets), KF6 (CoreAddons, I18n, Service, WindowSystem, Config, ConfigWidgets, Notifications, KIO, Bookmarks), Plasma (Plasma, PlasmaActivities, PlasmaActivitiesStats), LibTaskManager, LibNotificationManager, KSysGuard, KWin.
+Qt6 (Core, DBus, Qml, Quick, Widgets), KF6 (CoreAddons, I18n, Service, WindowSystem, Config, ConfigWidgets, Notifications, KIO), Plasma (Plasma, PlasmaActivities, PlasmaActivitiesStats), LibTaskManager, LibNotificationManager, KSysGuard.
 
 ## Packaging
 

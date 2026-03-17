@@ -1,0 +1,66 @@
+# CMake build artifacts
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+ecm_uninstall.cmake
+CTestTestfile.cmake
+install_manifest.txt
+
+# Build directories
+bin/
+lib/
+lib64/
+
+# Qt/QML build artifacts
+.qt/
+.rcc/
+.qmlcache/
+
+# Plugin build output
+plugin/*.so
+plugin/*.h
+plugin/*.o
+plugin/*.a
+plugin/.qt/
+plugin/.rcc/
+plugin/CMakeFiles/
+plugin/CTestTestfile.cmake
+plugin/Makefile
+plugin/cmake_install.cmake
+plugin/qmldir
+plugin/qmltypes/
+plugin/meta_types/
+plugin/*_autogen/
+plugin/*.qrc
+plugin/*.qmltypes
+plugin/wavetask_autogen/
+plugin/wavetaskplugin_autogen/
+
+# Generated source files
+plugin/log_settings.cpp
+plugin/kactivitymanagerd_plugins_settings.cpp
+plugin/kactivitymanagerd_plugins_settings.h
+plugin/wavetask_qmltyperegistrations.cpp
+plugin/*_in.cpp
+
+# KDE/Qt installation prefixes
+_install/
+install/
+
+# Editor and IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Test coverage
+coverage/
+*.gcov
+*.gcda
+*.gcno
+
+# Log files
+*.log
