@@ -19,7 +19,7 @@
       <default>true</default>
     </entry>
     <entry name="showOnlyMinimized" type="Bool">
-      <label>Whether to show only window tasks that are minmized.</label>
+      <label>Whether to show only window tasks that are minimized.</label>
       <default>false</default>
     </entry>
     <entry name="unhideOnAttention" type="Bool">
@@ -153,15 +153,15 @@
       <label> Spacing between icons in task manager. Margin is multiplied by this value.</label>
       <default>1</default>
     </entry>
-    <entry name="skinName" type="String">
-      <label> Skin.</label>
-      <default>default</default>
-    </entry>
     <entry name="iconSize" type="Int">
       <default>44</default>
+      <min>32</min>
+      <max>64</max>
     </entry>
-    <entry name="magnification" type="Double">
-      <default>90.0</default>
+    <entry name="magnification" type="Int">
+      <default>90</default>
+      <min>0</min>
+      <max>100</max>
     </entry>
   </group>
 

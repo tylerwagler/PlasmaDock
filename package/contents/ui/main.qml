@@ -11,7 +11,6 @@ import QtQuick.Layouts
 import org.kde.plasma.plasmoid
 import org.kde.plasma.components as PlasmaComponents3
 import org.kde.plasma.core as PlasmaCore
-import org.kde.ksvg as KSvg
 import org.kde.plasma.private.mpris as Mpris
 import org.kde.kirigami as Kirigami
 
@@ -47,8 +46,6 @@ PlasmoidItem {
 
     preferredRepresentation: fullRepresentation
 
-  //  Plasmoid.constraintHints: Plasmoid.CanFillArea
-
   // --- Transparency logic ---
   property Item containmentItem: null
   readonly property int depth: 14
@@ -70,57 +67,35 @@ PlasmoidItem {
 
       tasks.containmentItem.Plasmoid.backgroundHints = (isBackgroundDisabled) ? 0 : 1;
       tasks.Plasmoid.backgroundHints = (isBackgroundDisabled) ? 0 : 1;
+
+      ensurePanelFitsZoom();
   }
 
-  // --- Skin logic ---
-  property int topoutimage: 0
-  property var skinParams: ({
-      image: "", imagetask: "",
-      left: 0, top: 0, right: 0, bottom: 0,
-      outLeft: 0, outTop: 0, outRight: 0, outBottom: 0
-  })
+  function ensurePanelFitsZoom() {
+      let neededHeight = maxZoomedHeight + 14;
 
-  function loadSkinConfig() {
-      let skinName = Plasmoid.configuration.skinName || "default";
-      let configUrl = Qt.resolvedUrl("../skins/" + skinName + "/Config.qml");
-
-      let component = Qt.createComponent(configUrl);
-
-      if (Plasmoid.configuration.iconSize <= 44) {
-          tasks.topoutimage = Math.abs(Plasmoid.configuration.iconSize - 44);
-      } else {
-          tasks.topoutimage = 44 - Plasmoid.configuration.iconSize;
+      // Try to resize the panel window to fit zoomed icons
+      let win = tasks.Window.window;
+      if (win && win.height < neededHeight) {
+          win.height = neededHeight;
       }
 
-      if (component.status === Component.Ready) {
-          let config = component.createObject(tasks);
-
-          if (config) {
-              let skinFolderUrl = Qt.resolvedUrl("../skins/" + skinName + "/").toString();
-
-              tasks.skinParams = {
-                  image: skinFolderUrl + config.image,
-                  imagetask: skinFolderUrl + config.imagetask,
-                  left: config.leftMargin,
-                  top: config.topMargin,
-                  right: config.rightMargin,
-                  bottom: config.bottomMargin,
-                  outLeft: config.outsideLeftMargin,
-                  outTop: config.outsideTopMargin + tasks.topoutimage,
-                  outRight: config.outsideRightMargin,
-                  outBottom: config.outsideBottomMargin
-              };
-
-              config.destroy();
+      // Disable clipping on all ancestor QML items
+      let item = tasks.parent;
+      while (item) {
+          if (item.clip !== undefined) {
+              item.clip = false;
           }
-      } else {
-          console.warn("Failed to load skin Config.qml: " + component.errorString());
+          item = item.parent;
       }
   }
 
   // Counter of tasks currently zoomed; avoids iterating all tasks
   property int zoomedTaskCount: 0
   readonly property bool isZoomActive: zoomedTaskCount > 0
+
+  // Maximum icon height when fully zoomed (for panel sizing)
+  readonly property real maxZoomedHeight: Plasmoid.configuration.iconSize * (1.0 + Plasmoid.configuration.magnification / 100)
 
     Plasmoid.onUserConfiguringChanged: {
         if (Plasmoid.userConfiguring && groupDialog !== null) {
@@ -140,10 +115,13 @@ PlasmoidItem {
         if (shouldShrinkToZero) {
             return Kirigami.Units.gridUnit; // For edit mode
         }
-        return !vertical ? 0 : LayoutMetrics.preferredMinHeight();
+        if (!vertical) {
+            // Request enough height for zoomed icons + reflection
+            return maxZoomedHeight + Plasmoid.configuration.iconSize / 2 + 10;
+        }
+        return LayoutMetrics.preferredMinHeight();
     }
 
-//BEGIN TODO: this is not precise enough: launchers are smaller than full tasks
     Layout.preferredWidth: {
         if (shouldShrinkToZero) {
             return 0.01;
@@ -160,9 +138,9 @@ PlasmoidItem {
         if (vertical) {
             return taskList.Layout.maximumHeight
         }
-        return Kirigami.Units.gridUnit * 2;
+        // Request enough height for zoomed icons + reflection
+        return maxZoomedHeight + Plasmoid.configuration.iconSize / 2 + 10;
     }
-//END TODO
 
     property Item dragSource
 
@@ -402,14 +380,6 @@ PlasmoidItem {
         Connections {
             target: Plasmoid.configuration
 
-            function onSkinNameChanged() {
-                loadSkinConfig();
-            }
-
-            function onIconSizeChanged() {
-                loadSkinConfig();
-            }
-
             function onLaunchersChanged(): void {
                 tasksModel.launcherList = Plasmoid.configuration.launchers
             }
@@ -435,15 +405,6 @@ PlasmoidItem {
             Drag.onDragFinished: dropAction => {
                 tasks.dragSource = null;
             }
-        }
-
-        KSvg.FrameSvgItem {
-            id: taskFrame
-
-            visible: false
-
-            imagePath: tasks.skinParams.imagetask
-            prefix: TaskTools.taskPrefix("normal", Plasmoid.location)
         }
 
         MouseHandler {
@@ -482,109 +443,6 @@ PlasmoidItem {
             visible: false
         }
 
-        Loader {
-            id: backgroundLoader
-
-            anchors.fill: parent
-            sourceComponent: (Plasmoid.configuration.skinName === "default") ? defaultSkin : customSkin
-        }
-
-        // --- Default skin (SVG) ---
-        Component {
-            id: defaultSkin
-            Item {
-                id: internalCanvas
-
-                // How much the background expands laterally during zoom
-                readonly property int expansionAmount: tasks.isZoomActive ? 74 : 0
-
-                // Background layer
-                KSvg.FrameSvgItem {
-                    id: backgroundItem
-                    imagePath: "widgets/panel-background"
-                    prefix: ""
-                    z: -1
-
-                    height: (Plasmoid.configuration.iconSize < 48) ? taskList.height - (shadowItem.margins.top + 6) : taskList.height - (shadowItem.margins.top - 4)
-                    y: (Plasmoid.configuration.iconSize < 48) ? shadowItem.margins.top + 6 : shadowItem.margins.top - 4
-
-                    // Dynamic width and position
-                    width: (taskList.width - 56) + internalCanvas.expansionAmount
-                    x: 28 - (internalCanvas.expansionAmount / 2)
-
-                    Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-                    Behavior on x { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-
-                    anchors.leftMargin: shadowItem.margins.left
-                    anchors.topMargin: shadowItem.margins.top
-                    anchors.rightMargin: shadowItem.margins.right
-                    anchors.bottomMargin: shadowItem.margins.bottom
-                }
-
-                // Shadow layer
-                KSvg.FrameSvgItem {
-                    id: shadowItem
-                    imagePath: "widgets/panel-background"
-                    prefix: "shadow"
-                    z: -2
-
-                    height: (Plasmoid.configuration.iconSize < 48) ? taskList.height + (shadowItem.margins.top - 6) : taskList.height + (shadowItem.margins.top + 4)
-                    y: (Plasmoid.configuration.iconSize < 48) ? 6 : -4
-
-                    // Dynamic shadow width and position
-                    width: (taskList.width - 32) + internalCanvas.expansionAmount
-                    x: 16 - (internalCanvas.expansionAmount / 2)
-
-                    Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-                    Behavior on x { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-                }
-            }
-        }
-
-        // --- Custom skin (image) ---
-        Component {
-            id: customSkin
-            BorderImage {
-                id: dockBackground
-                asynchronous: false
-                visible: source.toString() !== ""
-                opacity: 1.0
-
-                // Margins shrink during zoom to extend the background
-                property int dynamicLeftMargin: tasks.isZoomActive ? (tasks.skinParams.outLeft - 27) : tasks.skinParams.outLeft
-                property int dynamicRightMargin: tasks.isZoomActive ? (tasks.skinParams.outRight - 27) : tasks.skinParams.outRight
-
-                anchors {
-                    fill: parent
-                    topMargin: tasks.skinParams.outTop
-                    bottomMargin: tasks.skinParams.outBottom
-
-                    leftMargin: dockBackground.dynamicLeftMargin
-                    rightMargin: dockBackground.dynamicRightMargin
-                }
-
-                Behavior on dynamicLeftMargin {
-                    NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
-                }
-                Behavior on dynamicRightMargin {
-                    NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
-                }
-
-                source: tasks.skinParams.image
-
-                border {
-                    left: tasks.skinParams.left
-                    top: tasks.skinParams.top
-                    right: tasks.skinParams.right
-                    bottom: tasks.skinParams.bottom
-                }
-
-                horizontalTileMode: BorderImage.Stretch
-                verticalTileMode: BorderImage.Stretch
-                z: -1
-            }
-        }
-
         TriangleMouseFilter {
             id: tmf
             filterTimeOut: 300
@@ -618,8 +476,10 @@ PlasmoidItem {
             TaskList {
                 id: taskList
 
+                // Extra width to prevent side clipping when edge icons zoom
+                readonly property real zoomOverflow: Plasmoid.configuration.iconSize * (Plasmoid.configuration.magnification / 100)
 
-                width: Math.ceil(taskRepeater.count * (Plasmoid.configuration.iconSize + 14))
+                width: Math.ceil(taskRepeater.count * (Plasmoid.configuration.iconSize + 14)) + zoomOverflow
                 height: tasks.height
 
                 // Total width of all icons for centering
@@ -779,7 +639,6 @@ PlasmoidItem {
         TaskTools.taskManagerInstanceCount += 1;
         requestLayout.connect(iconGeometryTimer.restart);
         applyBackgroundHint();
-        loadSkinConfig();
     }
 
     Component.onDestruction: {
@@ -790,7 +649,7 @@ PlasmoidItem {
     Timer {
         id: initializeAppletTimer
         interval: 1200
-        repeat: false
+        repeat: true
         running: true
 
         property int step: 0

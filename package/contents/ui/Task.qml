@@ -97,7 +97,7 @@ PlasmaCore.ToolTipArea {
 
     readonly property real _baseSize: Plasmoid.configuration.iconSize
     readonly property real _sigma: _baseSize * 1.8
-    readonly property real _amplitude: (Plasmoid.configuration.magnification || 0) / 100
+    readonly property real _amplitude: Plasmoid.configuration.magnification / 100
 
     // macOS-style zoom effect using Gaussian curve
     property real zoomFactor: {
@@ -574,8 +574,8 @@ PlasmaCore.ToolTipArea {
                     target: iconBox
                     anchors.leftMargin: 0
                     width: Math.min(task.parent.minimumWidth, tasks.height)
-                    - adjustMargin(true, task.width, taskFrame.margins.left)
-                    - adjustMargin(true, task.width, taskFrame.margins.right)
+                    - adjustMargin(true, task.width, frame.margins.left)
+                    - adjustMargin(true, task.width, frame.margins.right)
                 }
             }
         ]
@@ -628,10 +628,10 @@ PlasmaCore.ToolTipArea {
 
         anchors {
             fill: parent
-            leftMargin: taskFrame.margins.left + iconBox.width + LayoutMetrics.labelMargin
-            topMargin: taskFrame.margins.top
-            rightMargin: taskFrame.margins.right + (task.audioStreamIcon !== null && task.audioStreamIcon.visible ? (task.audioStreamIcon.width + LayoutMetrics.labelMargin) : 0)
-            bottomMargin: taskFrame.margins.bottom
+            leftMargin: frame.margins.left + iconBox.width + LayoutMetrics.labelMargin
+            topMargin: frame.margins.top
+            rightMargin: frame.margins.right + (task.audioStreamIcon !== null && task.audioStreamIcon.visible ? (task.audioStreamIcon.width + LayoutMetrics.labelMargin) : 0)
+            bottomMargin: frame.margins.bottom
         }
 
         wrapMode: (maximumLineCount === 1) ? Text.NoWrap : Text.Wrap

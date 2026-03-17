@@ -6,7 +6,6 @@
 
 import QtQuick
 import QtQuick.Controls as QQC2
-import Qt.labs.folderlistmodel
 
 import org.kde.kcmutils as KCMUtils
 import org.kde.kirigami as Kirigami
@@ -31,10 +30,8 @@ KCMUtils.SimpleKCM {
     property alias cfg_forceStripes: forceStripes.checked
     property alias cfg_taskMaxWidth: taskMaxWidth.currentIndex
     property int cfg_iconSpacing: 0
-    // wavetask
     property alias cfg_iconSize: iconSizeSlider.value
     property alias cfg_magnification: magnificationSlider.value
-    property string cfg_skinName: Plasmoid.configuration.skinName
 
     Component.onCompleted: {
         /* Don't rely on bindings for checking the radiobuttons
@@ -51,65 +48,8 @@ KCMUtils.SimpleKCM {
     }
     Kirigami.FormLayout {
 
-        QQC2.ComboBox {
-            id: skinChooser
-            Kirigami.FormData.label: "Skin:"
-            textRole: "fileName"
-
-            property bool initialSyncDone: false
-
-            model: FolderListModel {
-                id: folderModel
-                folder: Qt.resolvedUrl("../skins")
-                showDirs: true
-                showFiles: false
-                showDotAndDotDot: false
-                sortField: FolderListModel.Name
-            }
-
-            onActivated: {
-                cfg_skinName = textAt(currentIndex)
-            }
-
-            function syncValue() {
-                if (count > 0 && !initialSyncDone) {
-                    for (let i = 0; i < count; i++) {
-                        if (textAt(i) === cfg_skinName) {
-                            currentIndex = i;
-                            initialSyncDone = true;
-                            return;
-                        }
-                    }
-                    // Configured skin not found — fall back to "default"
-                    for (let i = 0; i < count; i++) {
-                        if (textAt(i) === "default") {
-                            currentIndex = i;
-                            cfg_skinName = "default";
-                            initialSyncDone = true;
-                            return;
-                        }
-                    }
-                    // Last resort: select first available skin
-                    currentIndex = 0;
-                    cfg_skinName = textAt(0);
-                    initialSyncDone = true;
-                }
-            }
-
-            Connections {
-                target: folderModel
-                function onStatusChanged() {
-                    if (folderModel.status === FolderListModel.Ready) {
-                        skinChooser.syncValue();
-                    }
-                }
-                function onCountChanged() { skinChooser.syncValue() }
-            }
-
-            Component.onCompleted: syncValue()
-        }
         RowLayout {
-            Kirigami.FormData.label: "Icon Size:"
+            Kirigami.FormData.label: i18nc("@label:slider", "Icon size:")
             spacing: Kirigami.Units.smallSpacing
 
             QQC2.Slider {
@@ -121,7 +61,7 @@ KCMUtils.SimpleKCM {
                 stepSize: 2
                 snapMode: QQC2.Slider.SnapOnRelease
 
-                value: Plasmoid.configuration.iconSize || 44
+                value: Plasmoid.configuration.iconSize
             }
 
             QQC2.Label {
@@ -133,7 +73,7 @@ KCMUtils.SimpleKCM {
         }
         // Zoom percentage selector
         RowLayout {
-            Kirigami.FormData.label: "Zoom Percentage:"
+            Kirigami.FormData.label: i18nc("@label:slider", "Zoom percentage:")
             spacing: Kirigami.Units.smallSpacing
 
             QQC2.Slider {
@@ -143,7 +83,7 @@ KCMUtils.SimpleKCM {
                 to: 100
                 stepSize: 5
                 snapMode: QQC2.Slider.SnapOnRelease
-                value: Plasmoid.configuration.magnification || 50
+                value: Plasmoid.configuration.magnification
             }
             QQC2.Label {
                 text: Math.floor(magnificationSlider.value) + "%"
