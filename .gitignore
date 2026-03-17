@@ -64,3 +64,6 @@ coverage/
 
 # Log files
 *.log
+
+# Claude Code agent settings
+.claude/
