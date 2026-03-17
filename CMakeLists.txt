@@ -26,8 +26,8 @@ find_package(Plasma ${KF6_MIN_VERSION} REQUIRED)
 find_package(PlasmaActivities ${KF6_MIN_VERSION} REQUIRED)
 
 add_subdirectory(plugin)
-plasma_install_package(package org.vicko.plasmadock)
+plasma_install_package(package org.plasmadock)
 install(DIRECTORY layout-templates/
-        DESTINATION ${KDE_INSTALL_DATADIR}/plasma/layout-templates/org.vicko.plasmadock.panel
+        DESTINATION ${KDE_INSTALL_DATADIR}/plasma/layout-templates/org.plasmadock.panel
 )
 

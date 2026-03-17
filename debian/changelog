@@ -1,5 +1,6 @@
-wavetask (6.6.0-1) unstable; urgency=medium
+plasmadock (6.6.0-1) unstable; urgency=medium
 
   * Initial Debian packaging.
+  * Rename from wavetask to plasmadock.
 
- -- Tyler Wagler <tyler.wagler@elytrondefense.com>  Sat, 14 Mar 2026 00:00:00 +0000
+ -- Tyler Wagler <tyler.wagler@elytrondefense.com>  Tue Mar 17 2026 00:00:00 +0000

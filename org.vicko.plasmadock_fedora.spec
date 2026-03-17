@@ -1,12 +1,12 @@
 %undefine _cmake_in_source_build
 
-Name:           wavetask
+Name:           plasmadock
 Version:        6.6.0
 Release:        1%{?dist}
 Summary:        Reusable Qt6 QML Task Manager Plugin for Plasma 6
 
 License:        GPL-2.0-or-later
-URL:            https://github.com/vickoc911/org.vicko.wavetask
+URL:            https://github.com/vickoc911/org.vicko.plasmadock
 Source0:        %{url}/archive/refs/heads/main.tar.gz#/%{name}-%{version}.tar.gz
 
 BuildRequires:  gcc-c++
@@ -17,7 +17,7 @@ BuildRequires:  extra-cmake-modules
 
 BuildRequires:  qt6-qtbase-devel
 BuildRequires:  qt6-qtbase-private-devel
-BuildRequires:  qt6-qtdeclarative-devel
+BuildRequires:  qt6-declarative-devel
 
 BuildRequires:  kf6-ki18n-devel
 BuildRequires:  kf6-kservice-devel
@@ -35,21 +35,20 @@ BuildRequires:  plasma-activities-stats-devel
 BuildRequires:  plasma-workspace-devel
 
 BuildRequires:  libksysguard-devel
-BuildRequires:  kwin-devel
 BuildRequires:  libepoxy-devel
 BuildRequires:  libdrm-devel
 
 BuildRequires:  cmake(LibTaskManager)
 BuildRequires:  cmake(LibNotificationManager)
 
-Provides:       qt6qmlimport(org.vicko.wavetask.1) = %{version}
-Provides:       qt6qmlimport(org.vicko.wavetask) = %{version}
+Provides:       qt6qmlimport(org.vicko.plasmadock.1) = %{version}
+Provides:       qt6qmlimport(org.vicko.plasmadock) = %{version}
 
 %description
-Plasmoid wavetask Qt6 QML Task Manager plugin for Plasma 6 environments with zoom.
+Plasmoid plasmadock Qt6 QML Task Manager plugin for Plasma 6 environments with zoom.
 
 %prep
-%autosetup -p1 -n org.vicko.wavetask-main
+%autosetup -p1 -n org.vicko.plasmadock-main
 
 %build
 export CXXFLAGS="%{optflags} -I%{_vpath_builddir}/plugin"
@@ -66,14 +65,17 @@ export CXXFLAGS="%{optflags} -I%{_vpath_builddir}/plugin"
 
 %files
 %dir %{_libdir}/qt6/qml/org/vicko
-%{_libdir}/qt6/qml/org/vicko/wavetask/
+%{_libdir}/qt6/qml/org/vicko/plasmadock/
 
-%{_datadir}/plasma/plasmoids/org.vicko.wavetask/
+%{_datadir}/plasma/plasmoids/org.vicko.plasmadock/
 
 %dir %{_datadir}/plasma/layout-templates
-%{_datadir}/plasma/layout-templates/org.vicko.wavetask.panel/
+%{_datadir}/plasma/layout-templates/org.vicko.plasmadock.panel/
 
 %changelog
+* Tue Mar 17 2026 Tyler Wagler <tyler.wagler@elytrondefense.com> - 6.6.0-3
+- Rename from wavetask to plasmadock
+
 * Sat Mar 14 2026 Tyler Wagler <tyler.wagler@elytrondefense.com> - 6.6.0-2
 - Strip skin system, fix clipping, comprehensive code audit
 

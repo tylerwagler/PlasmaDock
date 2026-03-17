@@ -31,9 +31,9 @@ Mark items `[x]` as they are fixed.
 - [x] **16. Fragile string-based type checking** — `691b23c`
 - [x] **17. Spanish comments and console output** — `fdc3b0c`, `243caab`
 - [x] **18. Outdated or missing SPDX headers** — `755d410`
-- [ ] **19. Expensive zoom computation in binding** — Deferred (core feature; already has early-return optimizations and 3σ cutoff)
+- [x] **19. Expensive zoom computation in binding** — `729f2d1` - Replaced O(n²) positioning with cumulative offset array
 - [x] **20. isZoomActive iterates all tasks** — `75991e1`
-- [x] **21. Hardcoded magic numbers** — `aaae855`
+- [x] **21. Hardcoded magic numbers** — `f3eba58`
 
 ## LOW
 
@@ -41,7 +41,7 @@ Mark items `[x]` as they are fixed.
 - [x] **23. Uninitialized pointer in header** — `9e3d917`
 - [x] **24. Silent failure on missing skin** — `ab40e1b`
 - [x] **25. Missing explicit CMake includes** — `1c2bee8`
-- [ ] **26. Inconsistent QML type annotations** — Deferred (cosmetic; no functional impact)
+- [x] **26. Inconsistent QML type annotations** — `3b18517`
 
 ## Also fixed
 
@@ -51,3 +51,5 @@ Mark items `[x]` as they are fixed.
 ## KNOWN BUGS (upstream, not introduced by this project)
 
 - BUG 464597, BUG 466675, BUG 452187, BUG 446105, QTBUG-127600
+
+(End of file - total 53 lines)

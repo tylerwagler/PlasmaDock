@@ -14,10 +14,10 @@
         "Category": "",
         "Description": "Dock layout for Plasma",
         "EnabledByDefault": true,
-        "Id": "org.vicko.wavetask.panel",
+        "Id": "org.plasmadock.panel",
         "License": "GPL-2.0-or-later",
         "Name": "Plasma Dock",
-        "Website": "https://github.com/vickoc911/org.vicko.wavetask"
+        "Website": "https://github.com/vickoc911/org.plasmadock"
     },
     "X-Plasma-ContainmentCategories": [
         "panel"

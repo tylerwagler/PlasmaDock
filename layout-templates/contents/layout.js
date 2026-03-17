@@ -22,6 +22,6 @@ for (var i = 0; i < currentWidgets.length; i++) {
 }
 
 // Add the task manager widget
-panel.addWidget("org.vicko.wavetask");
+panel.addWidget("org.plasmadock");
 
 panel.reloadConfig();

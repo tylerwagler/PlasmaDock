@@ -6,7 +6,7 @@
 
 #include <QtQml/QQmlExtensionPlugin>
 
-class org_vicko_wavetaskPlugin : public QQmlExtensionPlugin
+class org_plasmadockPlugin : public QQmlExtensionPlugin
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")

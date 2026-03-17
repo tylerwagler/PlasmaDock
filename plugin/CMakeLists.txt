@@ -44,7 +44,7 @@ set(plasmadock_source
 ecm_qt_declare_logging_category(plasmadock_LOG_SRCS
     HEADER log_settings.h
     IDENTIFIER PLASMADOCK_DEBUG
-    CATEGORY_NAME org.vicko.plasmadock
+    CATEGORY_NAME org.plasmadock
     DESCRIPTION "PlasmaDock plugin"
 )
 
@@ -68,7 +68,7 @@ set_target_properties(plasmadock PROPERTIES
 )
 
 qt_add_qml_module(plasmadock
-    URI org.vicko.plasmadock
+    URI org.plasmadock
     VERSION 1.0
 )
 
@@ -101,9 +101,9 @@ target_link_libraries(plasmadock
 # -------------------------------------------------
 # 6. Installation
 # -------------------------------------------------
-install(TARGETS plasmadock DESTINATION ${KDE_INSTALL_QMLDIR}/org/vicko/plasmadock)
+install(TARGETS plasmadock DESTINATION ${KDE_INSTALL_QMLDIR}/org/plasmadock)
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/qmldir
     ${CMAKE_CURRENT_BINARY_DIR}/plasmadock.qmltypes
-    DESTINATION ${KDE_INSTALL_QMLDIR}/org/vicko/plasmadock
+    DESTINATION ${KDE_INSTALL_QMLDIR}/org/plasmadock
 )

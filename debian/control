@@ -1,4 +1,4 @@
-Source: wavetask
+Source: plasmadock
 Section: kde
 Priority: optional
 Maintainer: Tyler Wagler <tyler.wagler@elytrondefense.com>
@@ -18,24 +18,22 @@ Build-Depends:
  libkf6configwidgets-dev,
  libkf6notifications-dev,
  libkf6kio-dev,
- libkf6bookmarks-dev,
  libkf6itemmodels-dev,
  libplasma-dev,
  plasma-activities-dev,
  plasma-activities-stats-dev,
  plasma-workspace-dev,
  libksysguard-dev,
- kwin-dev,
  libepoxy-dev,
  libdrm-dev,
 Standards-Version: 4.6.2
-Homepage: https://github.com/vickoc911/org.vicko.wavetask
+Homepage: https://github.com/vickoc911/org.vicko.plasmadock
 Rules-Requires-Root: no
 
-Package: wavetask
+Package: plasmadock
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Plasma 6 task manager with macOS-style zoom
- WaveTask is a Plasma 6 task manager applet with macOS-style dock zoom
+ PlasmaDock is a Plasma 6 task manager applet with macOS-style dock zoom
  animation and icon mirroring. It integrates with KDE Activities and
  supports smart launcher badges and progress indicators.
