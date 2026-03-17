@@ -52,6 +52,18 @@ PlasmoidItem {
     preferredRepresentation: fullRepresentation
 
   // --- Transparency logic ---
+  // NOTE: This is a workaround for Plasma not exposing a proper API for applets
+  // to control panel transparency. The ideal solution would be an upstream Plasma
+  // API that allows applets to request transparency changes.
+  //
+  // This code walks the containment hierarchy looking for the panel containment
+  // and forcibly sets backgroundHints to disable the panel background behind
+  // this applet. This affects the entire panel, not just this applet.
+  //
+  // Potential issues:
+  // - Modifies items this applet doesn't own
+  // - Could affect other applets on the same panel
+  // - Depends on Plasma internals that may change
   property Item containmentItem: null
   readonly property int depth: 14
   property bool isBackgroundDisabled: true
@@ -76,20 +88,32 @@ PlasmoidItem {
       ensurePanelFitsZoom();
   }
 
+   // NOTE: This function modifies the panel window and ancestor items,
+   // which are not owned by this applet. This is a fragile workaround
+   // that could break with Plasma updates or affect other applets.
+   //
+   // The ideal solution would be:
+   // 1. Plasma API for applets to request panel sizing
+   // 2. Proper containment hierarchy handling
+   // 3. Applet-specific clipping control
+   //
+   // Limited to 5 levels to avoid walking the entire tree and breaking
+   // unrelated components.
    function ensurePanelFitsZoom() {
        let neededHeight = maxZoomedHeight + panelZoomPadding;
 
-      // Try to resize the panel window to fit zoomed icons
-      let win = tasks.Window.window;
-      if (win && win.height < neededHeight) {
-          win.height = neededHeight;
-      }
+       // Try to resize the panel window to fit zoomed icons
+       let win = tasks.Window.window;
+       if (win && win.height < neededHeight) {
+           win.height = neededHeight;
+       }
 
-      // Disable clipping on all ancestor QML items
-      let item = tasks.parent;
-      while (item) {
-          if (item.clip !== undefined) {
-              item.clip = false;
+       // Disable clipping on ancestor QML items (limited to 5 levels)
+       let item = tasks.parent;
+       let depth = 0;
+       while (item && depth < 5) {
+           if (item.clip !== undefined) {
+               item.clip = false;
           }
           item = item.parent;
       }
