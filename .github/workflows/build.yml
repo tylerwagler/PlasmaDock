@@ -50,7 +50,8 @@ jobs:
             plasma-activities-stats-dev \
             libksysguard-dev \
             libepoxy-dev \
-            libdrm-dev
+            libdrm-dev \
+            plasma-workspace-dev
 
       - name: Configure CMake
         run: |
@@ -114,6 +115,7 @@ jobs:
             libksysguard-dev \
             libepoxy-dev \
             libdrm-dev \
+            plasma-workspace-dev \
             dpkg-dev
 
       - name: Build
