@@ -40,10 +40,6 @@ jobs:
             libkf6newstuff-dev \
             libkf6activities-dev \
             libksysguard-dev \
-            libplasma6-dev \
-            plasma-activities-dev \
-            plasma-activities-stats-dev \
-            plasma-workspace-dev \
             libkf6itemmodels-dev
 
       - name: Configure CMake
@@ -97,10 +93,6 @@ jobs:
             libkf6newstuff-dev \
             libkf6activities-dev \
             libksysguard-dev \
-            libplasma6-dev \
-            plasma-activities-dev \
-            plasma-activities-stats-dev \
-            plasma-workspace-dev \
             libkf6itemmodels-dev \
             dpkg-dev
 
