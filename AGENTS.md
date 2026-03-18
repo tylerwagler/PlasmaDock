@@ -1,7 +1,7 @@
-# PlasmaDock Plasma Plugin - Agent Guidelines
+# PlasmaDock Development Guide
 
 ## Overview
-This document provides instructions for agentic coding agents working on the PlasmaDock Plasma plugin. The plugin is a Plasma applet that serves as a task manager replacement written in C++ with Qt/KDE Frameworks 6.
+PlasmaDock is a KDE Plasma 6 task manager applet with macOS-style dock zoom animation. Built with C++23, Qt 6.4+, and KDE Frameworks 6.0+. Targets Plasma 6.6+.
 
 ## Project Structure
 ```
@@ -16,8 +16,9 @@ This document provides instructions for agentic coding agents working on the Pla
 │   ├── metadata.json        # Plugin metadata
 │   └── contents/            # QML UI components
 │       ├── ui/              # QML components
-│       └── skins/           # Visual themes
-└── README.md                # Project overview
+│       └── skins/           # Visual themes (legacy, may be removed)
+├── layout-templates/        # Pre-configured panel layouts
+└── README.md                # User-facing documentation
 ```
 
 ## Build System
@@ -48,7 +49,10 @@ For iterative development:
 cd build
 make -j$(nproc)   # Rebuild changed targets
 # Copy updated plugin to Plasma components directory:
-cp libplasmadockplugin.so ~/.local/lib/qt6/qml/org/vicko/plasmadock/
+cp libplasmadockplugin.so ~/.local/lib/qt6/qml/org/plasmadock/
+
+# Reload to test changes
+plasmashell --replace
 ```
 
 ### Testing
@@ -59,8 +63,8 @@ The project currently lacks automated tests. To validate changes:
    plasmashell --replace
    ```
 3. Add the PlasmaDock widget to a panel:
-   - Right-click on panel → "Add Plasmoids"
-   - Find "Wave Task Manager" and add it to your panel
+   - Right-click on panel → "Add Widgets"
+   - Find "PlasmaDock" and add it to your panel
 4. Verify functionality in the panel
 
 ### Single Test Execution
@@ -70,6 +74,30 @@ No test framework is configured. When tests are added:
 ctest -R <test_name>  # Run specific test by regex
 ctest -V              # Verbose output
 ```
+
+## Architecture
+
+### C++ Plugin (`plugin/`)
+Compiled as `libplasmadockplugin.so`, registered as a Qt6 QML module (`org.plasmadock`).
+
+- **`backend.h/cpp`** — Core task manager logic. Handles jump list actions, places, recent documents, KActivities integration. Exposed to QML via `QML_ELEMENT`.
+- **`smartlauncherbackend.h/cpp`** — Monitors D-Bus for app badge counts, progress bars, and urgency flags. Integrates with NotificationManager and Unity Launcher API.
+- **`smartlauncheritem.h/cpp`** — Per-launcher QML item wrapping the shared SmartLauncher::Backend singleton (`std::weak_ptr`).
+- **`plugin.cpp`** — QmlExtensionPlugin entry point.
+
+### QML Frontend (`package/contents/ui/`)
+The UI layer.
+
+- **`main.qml`** — Root plasmoid. Handles panel transparency, zoom state tracking, panel rotation.
+- **`Task.qml`** — Individual task delegate with zoom animation, mouse events, tooltips.
+- **`TaskList.qml`** — Task list container using Repeater.
+- **`ContextMenu.qml`** — Right-click context menu with recent/frequent actions.
+- **`ToolTipInstance.qml`** — Task preview tooltips.
+- **`ConfigAppearance.qml` / `ConfigBehavior.qml`** — Settings panels.
+- **`code/LayoutMetrics.js`, `code/TaskTools.js`** — Sizing calculations and task utilities.
+
+### Layout Templates (`layout-templates/`)
+Pre-configured panel layouts including the "Plasma Dock" dock-style layout.
 
 ## Code Style Guidelines
 
@@ -155,7 +183,7 @@ Example:
 - Use `KConfigWatcher` for configuration changes
 - Use `KPluginFactory`/`K_PLUGIN_CLASS_WITH_JSON` for plugins (though this uses manual registration)
 - Log with categories defined via `ECMQtDeclareLoggingCategory`
-- Use `KIconUtils::loadIconFromTheme` or `QIcon::fromTheme()` for theme icons
+- Use `KIconUtils::loadIconIconFromTheme` or `QIcon::fromTheme()` for theme icons
 
 ### QML/JavaScript
 - Follow Qt Quick coding conventions
@@ -185,6 +213,13 @@ Example:
   - `chore`: build process, tooling updates
 - Reference issues: `Fixes #123` or `Related to #456`
 
+## Key Dependencies
+- Qt6 (Core, DBus, Qml, Quick, Widgets)
+- KF6 (CoreAddons, I18n, Service, WindowSystem, Config, ConfigWidgets, Notifications, KIO, Bookmarks, Solid)
+- Plasma (Plasma, PlasmaActivities, PlasmaActivitiesStats)
+- LibTaskManager, LibNotificationManager
+- KSysGuard
+
 ## Additional Notes
 - The plugin integrates with KDE Activities via `PlasmaActivities::Consumer`
 - Uses KIO for launching applications
@@ -202,3 +237,43 @@ Example:
    ```
 2. Version mismatches: Ensure Qt 6.4+ and KF6 6.0+ are installed
 3. QML module not found: Verify `qt_add_qml_module` is working and QML imports are correct
+
+## Packaging
+
+### Automated Builds
+GitHub Actions automatically builds `.deb` (Ubuntu/Debian) and `.rpm` (Fedora/openSUSE) packages when a new release is published:
+- See `.github/workflows/build.yml` for the CI/CD configuration
+- Download packages from the GitHub Releases page
+
+### Manual Packaging
+
+#### Debian/Ubuntu
+```bash
+# Install build dependencies
+sudo apt install build-essential cmake extra-cmake-modules \
+  qt6-base-dev qt6-base-private-dev qt6-declarative-dev \
+  libkf6coreaddons-dev libkf6i18n-dev libkf6service-dev \
+  libkf6windowsystem-dev libkf6config-dev libkf6configwidgets-dev \
+  libkf6notifications-dev libkf6kio-dev libkf6bookmarks-dev \
+  libkf6itemmodels-dev libplasma-dev plasma-activities-dev \
+  plasma-activities-stats-dev plasma-workspace-dev \
+  libksysguard-dev kwin-dev libepoxy-dev libdrm-dev
+
+# Build DEB package
+dpkg-buildpackage -us -uc
+```
+
+#### Fedora
+```bash
+# Install build dependencies
+sudo dnf install gcc-c++ cmake extra-cmake-modules \
+  qt6-qtbase-devel qt6-qtbase-private-devel qt6-qtdeclarative-devel \
+  kf6-ki18n-devel kf6-kservice-devel kf6-kwindowsystem-devel \
+  kf6-kconfig-devel kf6-kconfigwidgets-devel kf6-knotifications-devel \
+  kf6-kio-devel kf6-kcoreaddons-devel kf6-kitemmodels-devel \
+  libplasma-devel plasma-activities-devel plasma-activities-stats-devel \
+  plasma-workspace-devel libksysguard-devel kwin-devel libepoxy-devel libdrm-devel
+
+# Build RPM package (requires spec file)
+rpmbuild -ba plasmadock.spec
+```
