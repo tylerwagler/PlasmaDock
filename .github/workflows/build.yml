@@ -191,7 +191,7 @@ jobs:
     if: github.event_name == 'release'
 
     container:
-      image: fedora:40
+      image: fedora:41
 
     steps:
       - name: Checkout code
