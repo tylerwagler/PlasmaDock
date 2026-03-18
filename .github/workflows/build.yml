@@ -65,7 +65,7 @@ jobs:
           make -j$(nproc)
 
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.0
         with:
           name: plasmadock-build
           path: build/
