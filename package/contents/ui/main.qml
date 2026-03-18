@@ -200,17 +200,18 @@ PlasmoidItem {
         return DBus.SessionBus.asyncCall({service: "org.kde.KWin.Effect.WindowView1", path: "/org/kde/KWin/Effect/WindowView1", iface: "org.kde.KWin.Effect.WindowView1", member: "activate", arguments: [winIds.map(s => String(s))], signature: "(as)"});
     }
 
-    function publishIconGeometries(taskItems: var): void {
+    function publishIconGeometries(): void {
         if (TaskTools.taskManagerInstanceCount >= 2) {
             return;
         }
-        for (let i = 0; i < taskItems.length; ++i) {
-            const task = taskItems[i];
+        for (let i = 0; i < taskRepeater.count; ++i) {
+            const task = taskRepeater.itemAt(i);
 
-            if (!task.model.IsLauncher && !task.model.IsStartup) {
-                tasksModel.requestPublishDelegateGeometry(tasksModel.makeModelIndex(task.index),
-                    backend.globalRect(task), task);
+            if (!task || task.model.IsLauncher || task.model.IsStartup) {
+                continue;
             }
+            tasksModel.requestPublishDelegateGeometry(tasksModel.makeModelIndex(task.index),
+                backend.globalRect(task), task);
         }
     }
 
@@ -396,7 +397,7 @@ PlasmoidItem {
             repeat: false
 
             onTriggered: {
-                tasks.publishIconGeometries(taskList.children, tasks);
+                tasks.publishIconGeometries();
             }
         }
 
@@ -443,7 +444,7 @@ PlasmoidItem {
 
             anchors.fill: parent
 
-            target: taskList
+            target: dockContainer
 
             onUrlsDropped: urls => {
                 // If all dropped URLs point to application desktop files, we'll add a launcher for each of them.
@@ -513,8 +514,20 @@ PlasmoidItem {
                 width: Math.ceil(taskRepeater.count * (Plasmoid.configuration.iconSize + panelZoomPadding)) + zoomOverflow
                 height: tasks.height
 
+                // Total width of all icons for centering
+                readonly property real iconsTotalWidth: {
+                    let total = 0;
+                    for (let i = 0; i < taskRepeater.count; ++i) {
+                        let item = taskRepeater.itemAt(i);
+                        total += item ? item.width : Plasmoid.configuration.iconSize;
+                    }
+                    return total;
+                }
+
+                // Offset needed to center the icon block
+                readonly property real centerOffset: (width - iconsTotalWidth) / 2
+
                 // Precomputed cumulative X offsets for O(1) task positioning
-                // Updated whenever any task width changes
                 property var taskOffsets: {
                     let offsets = [centerOffset];
                     for (let i = 0; i < taskRepeater.count; ++i) {
@@ -524,15 +537,6 @@ PlasmoidItem {
                     }
                     return offsets;
                 }
-
-                // Total width of all icons for centering (derived from offsets)
-                readonly property real iconsTotalWidth: {
-                    let offsets = taskOffsets;
-                    return offsets.length > 1 ? offsets[offsets.length - 1] - offsets[0] : 0;
-                }
-
-                // Offset needed to center the icon block
-                readonly property real centerOffset: (width - iconsTotalWidth) / 2
 
                 Layout.maximumWidth: width
 
@@ -545,7 +549,7 @@ PlasmoidItem {
 
                 onAnimatingChanged: {
                     if (!animating) {
-                        tasks.publishIconGeometries(children, tasks);
+                        tasks.publishIconGeometries();
                     }
                 }
 
@@ -553,62 +557,56 @@ PlasmoidItem {
                     id: dockContainer
                     anchors.fill: parent
 
-                    // MouseArea for detecting mouse movement across the dock
-                    MouseArea {
-                        id: dockMouseArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        acceptedButtons: Qt.NoButton
+                    property real smoothMouseX: -1
+                    property bool insideDock: false
+                    property alias animating: taskList.animating
 
-                        property real smoothMouseX: -1
-                        property bool insideDock: false
+                    HoverHandler {
+                        id: dockHoverHandler
 
-                        // Lerp smoothing to avoid flickering
-                        onPositionChanged: (mouse) => {
-                            let mappedPos = mapToItem(tasks, mouse.x, mouse.y);
-                            if (smoothMouseX < 0) {
-                                smoothMouseX = mappedPos.x;
+                        onPointChanged: {
+                            let mappedPos = dockContainer.mapToItem(tasks, point.position.x, point.position.y);
+                            if (dockContainer.smoothMouseX < 0) {
+                                dockContainer.smoothMouseX = mappedPos.x;
                             } else {
-                                smoothMouseX = smoothMouseX + (mappedPos.x - smoothMouseX) * 0.3;
+                                dockContainer.smoothMouseX = dockContainer.smoothMouseX + (mappedPos.x - dockContainer.smoothMouseX) * 0.3;
                             }
-                            insideDock = true;
+                            dockContainer.insideDock = true;
                         }
 
-                        onEntered: {
-                            insideDock = true;
-                        }
-
-                        onExited: {
-                            exitTimer.restart();
-                        }
-
-                        Timer {
-                            id: exitTimer
-                            interval: 40
-                            repeat: false
-                            onTriggered: {
-                                if (!dockMouseArea.containsMouse) {
-                                    dockMouseArea.insideDock = false;
-                                    dockMouseArea.smoothMouseX = -1;
-                                }
+                        onHoveredChanged: {
+                            if (hovered) {
+                                dockContainer.insideDock = true;
+                            } else {
+                                exitTimer.restart();
                             }
                         }
+                    }
 
-                        onPressed: (mouse) => { mouse.accepted = false }
-
-                        Repeater {
-                            id: taskRepeater
-                            model: tasksModel
-
-                            delegate: Task {
-                                id: taskItem
-                                tasksRoot: tasks
-                                dockRef: dockMouseArea
-
-                                x: taskList.taskOffsets[index] ?? taskList.centerOffset
-
-                                width: (Plasmoid.configuration.iconSize * zoomFactor) + 6
+                    Timer {
+                        id: exitTimer
+                        interval: 40
+                        repeat: false
+                        onTriggered: {
+                            if (!dockHoverHandler.hovered) {
+                                dockContainer.insideDock = false;
+                                dockContainer.smoothMouseX = -1;
                             }
+                        }
+                    }
+
+                    Repeater {
+                        id: taskRepeater
+                        model: tasksModel
+
+                        delegate: Task {
+                            id: taskItem
+                            tasksRoot: tasks
+                            dockRef: dockContainer
+
+                            x: taskList.taskOffsets[index] ?? taskList.centerOffset
+
+                            width: (Plasmoid.configuration.iconSize * zoomFactor) + 6
                         }
                     }
                 }

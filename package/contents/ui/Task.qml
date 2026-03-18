@@ -17,6 +17,7 @@ import org.kde.plasma.components as PlasmaComponents3
 import org.kde.kirigami as Kirigami
 import org.plasmadock as TaskManagerApplet
 import org.kde.plasma.plasmoid
+import org.kde.taskmanager as TaskManager
 
 import "code/LayoutMetrics.js" as LayoutMetrics
 import "code/TaskTools.js" as TaskTools
@@ -30,6 +31,10 @@ PlasmaCore.ToolTipArea {
     // is rotated by 180 degrees(see main.qml). This makes the tasks rotated,
     // so un-rotate them here to fix that.
     rotation: Plasmoid.configuration.reverseMode && Plasmoid.formFactor === PlasmaCore.Types.Vertical ? 180 : 0
+
+    // Internal drag reordering is handled by taskDragHandler + _dragLocalX below.
+    // Qt's Drag attached type is NOT used for internal moves (Drag.Internal would
+    // physically relocate the item, breaking the x-offset binding and zoom).
 
     implicitHeight: inPopup
                     ? LayoutMetrics.preferredHeightInPopup()
@@ -102,6 +107,18 @@ PlasmaCore.ToolTipArea {
     readonly property int _taskWidthPadding: 6
     readonly property int _iconBottomOffset: -5
     readonly property int _reflectionHorizontalOffset: -4
+
+    // Lift the dragged task above its siblings and translate it with the cursor.
+    // Uses scene coordinates so the visual position stays stable across model
+    // reorders and zoom-driven offset changes.
+    z: taskDragHandler.active ? 1000 : 0
+    property real _dragStartSceneX: 0
+    property real _dragStartTaskX: 0
+    transform: Translate {
+        x: taskDragHandler.active
+            ? taskDragHandler.centroid.scenePosition.x - task._dragStartSceneX + task._dragStartTaskX - task.x
+            : 0
+    }
 
     // macOS-style zoom effect using Gaussian curve
     property real zoomFactor: {
@@ -208,7 +225,7 @@ PlasmaCore.ToolTipArea {
 
     onChildCountChanged: {
         if (TaskTools.taskManagerInstanceCount < 2 && childCount > previousChildCount) {
-            tasksModel.requestPublishDelegateGeometry(modelIndex(), backend.globalRect(task), task);
+            tasksRoot.tasksModel.requestPublishDelegateGeometry(modelIndex(), backend.globalRect(task), task);
         }
 
         previousChildCount = childCount;
@@ -260,14 +277,14 @@ PlasmaCore.ToolTipArea {
     Keys.onDownPressed: event => Keys.rightPressed(event)
     Keys.onLeftPressed: event => {
         if (!inPopup && (event.modifiers & Qt.ControlModifier) && (event.modifiers & Qt.ShiftModifier)) {
-            tasksModel.move(task.index, task.index - 1);
+            tasksRoot.tasksModel.move(task.index, task.index - 1);
         } else {
             event.accepted = false;
         }
     }
     Keys.onRightPressed: event => {
         if (!inPopup && (event.modifiers & Qt.ControlModifier) && (event.modifiers & Qt.ShiftModifier)) {
-            tasksModel.move(task.index, task.index + 1);
+            tasksRoot.tasksModel.move(task.index, task.index + 1);
         } else {
             event.accepted = false;
         }
@@ -275,8 +292,8 @@ PlasmaCore.ToolTipArea {
 
     function modelIndex(): var { // returns QModelIndex
         return inPopup
-            ? tasksModel.makeModelIndex(groupDialog.visualParent.index, index)
-            : tasksModel.makeModelIndex(index);
+            ? tasksRoot.tasksModel.makeModelIndex(groupDialog.visualParent.index, index)
+            : tasksRoot.tasksModel.makeModelIndex(index);
     }
 
     function showContextMenu(args: var): void {
@@ -339,7 +356,7 @@ PlasmaCore.ToolTipArea {
         mainItem.blockingUpdates = (mainItem.isGroup !== model.IsGroupParent); // BUG 464597 Force unload the previous component
 
         mainItem.parentTask = this;
-        mainItem.rootIndex = tasksModel.makeModelIndex(index, -1);
+        mainItem.rootIndex = tasksRoot.tasksModel.makeModelIndex(index, -1);
 
         mainItem.appName = Qt.binding(() => model.AppName);
         mainItem.pidParent = Qt.binding(() => model.AppPid);
@@ -368,6 +385,45 @@ PlasmaCore.ToolTipArea {
         function onStreamsChanged(): void {
             task.updateAudioStreams({delay: true})
         }
+    }
+
+    DragHandler {
+        id: taskDragHandler
+        target: null // Don't physically move the item
+        grabPermissions: PointerHandler.TakeOverForbidden
+        onActiveChanged: {
+            if (active) {
+                task._dragStartSceneX = centroid.scenePosition.x;
+                task._dragStartTaskX = task.x;
+                tasksRoot.dragSource = task;
+            } else {
+                tasksRoot.dragSource = null;
+            }
+        }
+    }
+
+    // Track drag position in dockContainer coordinates for reordering
+    property bool _moveCooldown: false
+    readonly property real _dragLocalX: {
+        if (!taskDragHandler.active) return -1;
+        let scenePos = taskDragHandler.centroid.scenePosition;
+        let local = dockRef.mapFromItem(null, scenePos.x, scenePos.y);
+        return local.x;
+    }
+    on_DragLocalXChanged: {
+        if (_dragLocalX < 0 || _moveCooldown) return;
+        if (tasksRoot.tasksModel?.sortMode !== TaskManager.TasksModel.SortManual) return;
+        let target = dockRef.childAt(_dragLocalX, task.height / 2);
+        if (target && target !== task && target.index !== undefined && target.index !== index) {
+            tasksRoot.tasksModel.move(index, target.index);
+            _moveCooldown = true;
+            _moveCooldownTimer.restart();
+        }
+    }
+    Timer {
+        id: _moveCooldownTimer
+        interval: 200
+        onTriggered: task._moveCooldown = false
     }
 
     TapHandler {
@@ -417,15 +473,15 @@ PlasmaCore.ToolTipArea {
         onTapped: (eventPoint, button) => {
             if (button === Qt.MiddleButton) {
                 if (Plasmoid.configuration.middleClickAction === TaskManagerApplet.Backend.NewInstance) {
-                    tasksModel.requestNewInstance(modelIndex());
+                    tasksRoot.tasksModel.requestNewInstance(modelIndex());
                 } else if (Plasmoid.configuration.middleClickAction === TaskManagerApplet.Backend.Close) {
-                    tasksModel.requestClose(modelIndex());
+                    tasksRoot.tasksModel.requestClose(modelIndex());
                 } else if (Plasmoid.configuration.middleClickAction === TaskManagerApplet.Backend.ToggleMinimized) {
-                    tasksModel.requestToggleMinimized(modelIndex());
+                    tasksRoot.tasksModel.requestToggleMinimized(modelIndex());
                 } else if (Plasmoid.configuration.middleClickAction === TaskManagerApplet.Backend.ToggleGrouping) {
-                    tasksModel.requestToggleGrouping(modelIndex());
+                    tasksRoot.tasksModel.requestToggleGrouping(modelIndex());
                 } else if (Plasmoid.configuration.middleClickAction === TaskManagerApplet.Backend.BringToCurrentDesktop) {
-                    tasksModel.requestVirtualDesktops(modelIndex(), [virtualDesktopInfo.currentDesktop]);
+                    tasksRoot.tasksModel.requestVirtualDesktops(modelIndex(), [virtualDesktopInfo.currentDesktop]);
                 }
             } else if (button === Qt.BackButton || button === Qt.ForwardButton) {
                 const playerData = mpris2Source.playerForLauncherUrl(task.model.LauncherUrlWithoutIcon, task.model.AppPid);
@@ -459,49 +515,6 @@ PlasmaCore.ToolTipArea {
         property bool isHovered: task.highlighted && Plasmoid.configuration.taskHoverEffect
         property string basePrefix: "normal"
         prefix: isHovered ? TaskTools.taskPrefixHovered(basePrefix, Plasmoid.location) : TaskTools.taskPrefix(basePrefix, Plasmoid.location)
-
-        // Avoid repositioning delegate item after dragFinished
-        DragHandler {
-            id: dragHandler
-            grabPermissions: PointerHandler.CanTakeOverFromHandlersOfDifferentType
-
-            function setRequestedInhibitDnd(value: bool): void {
-                // This is modifying the value in the panel containment that
-                // inhibits accepting drag and drop, so that we don't accidentally
-                // drop the task on this panel.
-                let item = this;
-                while (item.parent) {
-                    item = item.parent;
-                    if (item.appletRequestsInhibitDnD !== undefined) {
-                        item.appletRequestsInhibitDnD = value
-                    }
-                }
-            }
-
-            onActiveChanged: {
-                if (active) {
-                    icon.grabToImage(result => {
-                        if (!dragHandler.active) {
-                            // BUG 466675 grabToImage is async, so avoid updating dragSource when active is false
-                            return;
-                        }
-                        setRequestedInhibitDnd(true);
-                        tasksRoot.dragSource = task;
-                        dragHelper.Drag.imageSource = result.url;
-                        dragHelper.Drag.mimeData = {
-                            "text/x-orgkdeplasmataskmanager_taskurl": backend.tryDecodeApplicationsUrl(model.LauncherUrlWithoutIcon).toString(),
-                            [model.MimeType]: model.MimeData,
-                            "application/x-orgkdeplasmataskmanager_taskbuttonitem": model.MimeData,
-                        };
-                        dragHelper.Drag.active = dragHandler.active;
-                    });
-                } else {
-                    setRequestedInhibitDnd(false);
-                    dragHelper.Drag.active = false;
-                    dragHelper.Drag.imageSource = "";
-                }
-            }
-        }
     }
 
     Loader {

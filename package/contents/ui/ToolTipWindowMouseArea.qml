@@ -22,21 +22,21 @@ MouseArea {
     onClicked: (mouse) => {
         switch (mouse.button) {
         case Qt.LeftButton:
-            tasksModel.requestActivate(modelIndex);
+            rootTask.tasksRoot.tasksModel.requestActivate(modelIndex);
             rootTask.hideImmediately();
-            tasks.cancelHighlightWindows();
+            rootTask.tasksRoot.cancelHighlightWindows();
             break;
         case Qt.MiddleButton:
-            tasks.cancelHighlightWindows();
-            tasksModel.requestClose(modelIndex);
+            rootTask.tasksRoot.cancelHighlightWindows();
+            rootTask.tasksRoot.tasksModel.requestClose(modelIndex);
             break;
         case Qt.RightButton:
-            tasks.createContextMenu(rootTask, modelIndex).show();
+            rootTask.tasksRoot.createContextMenu(rootTask, modelIndex).show();
             break;
         }
     }
 
     onContainsMouseChanged: {
-        tasks.windowsHovered([String(winId)], containsMouse);
+        rootTask.tasksRoot.windowsHovered([String(winId)], containsMouse);
     }
 }

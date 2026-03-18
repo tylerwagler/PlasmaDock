@@ -19,7 +19,7 @@ make -j$(nproc)
 make install DESTDIR=$(pwd)/install
 
 # Iterative dev: copy rebuilt plugin
-cp plugin/libplasmadockplugin.so ~/.local/lib/qt6/qml/org/vicko/plasmadock/
+cp plugin/libplasmadockplugin.so ~/.local/lib/qt6/qml/org/plasmadock/
 
 # Reload to test changes
 plasmashell --replace

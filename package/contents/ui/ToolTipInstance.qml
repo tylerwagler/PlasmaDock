@@ -183,8 +183,8 @@ ColumnLayout {
                 Layout.topMargin: -headerItem.Layout.margins
                 icon.name: "window-close"
                 onClicked: {
-                    tasks.cancelHighlightWindows();
-                    tasksModel.requestClose(root.submodelIndex);
+                    toolTipDelegate.parentTask.tasksRoot.cancelHighlightWindows();
+                    toolTipDelegate.parentTask.tasksRoot.tasksModel.requestClose(root.submodelIndex);
                 }
                 PlasmaComponents3.ToolTip.text: i18nc("@info:tooltip Close this window", "Close window")
                 PlasmaComponents3.ToolTip.visible: root.visible && hovered

@@ -12,16 +12,6 @@ const labelMargin = Kirigami.Units.smallSpacing;
 // NOTE: horizontalMargins() and verticalMargins() were removed as they
 // always returned 0 and added no value. Call sites now use 0 directly.
 
-function adjustMargin(height, margin) {
-    const available = height; // verticalMargins() removed (always 0)
-
-    if (available < Kirigami.Units.iconSizes.small) {
-        return Math.floor((margin * (Kirigami.Units.iconSizes.small / available)) / 3);
-    }
-
-    return margin;
-}
-
 function maxStripes() {
     const length = tasks.vertical ? tasks.width : tasks.height;
     const minimum = tasks.vertical ? preferredMinWidth() : preferredMinHeight();

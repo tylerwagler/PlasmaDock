@@ -77,7 +77,6 @@ qt_add_qml_module(plasmadock
 # -------------------------------------------------
 set_target_properties(plasmadock PROPERTIES
     OUTPUT_NAME "plasmadockplugin"
-    PREFIX "lib"
 )
 
 target_include_directories(plasmadock PRIVATE
