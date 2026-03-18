@@ -221,7 +221,9 @@ jobs:
             rpm-devel \
             kf5-kbookmarks-devel \
             kf5-knewstuff-devel \
-            kf5-kactivities-devel || true
+            kf5-kactivities-devel \
+            libksysguard-devel \
+            qt6-base-private-devel
 
       - name: Build
         run: |
