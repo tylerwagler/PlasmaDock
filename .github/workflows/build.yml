@@ -1,0 +1,315 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y \
+            cmake \
+            extra-cmake-modules \
+            build-essential \
+            qt6-base-dev \
+            qt6-declarative-dev \
+            qt6-tools-dev \
+            libqt6dbus6 \
+            libkf6i18n-dev \
+            libkf6service-dev \
+            libkf6config-dev \
+            libkf6configwidgets-dev \
+            libkf6notifications-dev \
+            libkf6kio-dev \
+            libkf6bookmarks-dev \
+            libkf6windowsystem-dev \
+            libkf6solid-dev \
+            plasma-framework-dev \
+            libkf6activities-dev \
+            libkf6newstuff-dev \
+            libksysguard-dev
+
+      - name: Configure CMake
+        run: |
+          mkdir -p build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+
+      - name: Build
+        run: |
+          cd build
+          make -j$(nproc)
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: plasmadock-build
+          path: build/
+          retention-days: 7
+
+  package-deb:
+    needs: build
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'release'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          apt-get install -y \
+            cmake \
+            extra-cmake-modules \
+            build-essential \
+            qt6-base-dev \
+            qt6-declarative-dev \
+            qt6-tools-dev \
+            libqt6dbus6 \
+            libkf6i18n-dev \
+            libkf6service-dev \
+            libkf6config-dev \
+            libkf6configwidgets-dev \
+            libkf6notifications-dev \
+            libkf6kio-dev \
+            libkf6bookmarks-dev \
+            libkf6windowsystem-dev \
+            libkf6solid-dev \
+            plasma-framework-dev \
+            libkf6activities-dev \
+            libkf6newstuff-dev \
+            libksysguard-dev \
+            dpkg-dev
+
+      - name: Build
+        run: |
+          mkdir -p build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+          make -j$(nproc)
+
+      - name: Create DEB package
+        run: |
+          # Create package directory structure
+          mkdir -p deb-staging
+          cd build
+          
+          # Install to staging directory
+          make install DESTDIR=${{ github.workspace }}/deb-staging
+          
+          # Create DEB directory structure
+          mkdir -p deb-staging/DEBIAN
+          
+          # Create control file
+          cat > deb-staging/DEBIAN/control << EOF
+          Package: plasmadock
+          Version: ${{ github.event.release.tag_name }}
+          Section: kde
+          Priority: optional
+          Architecture: amd64
+          Depends: plasma-desktop, qt6-base, qt6-declarative, libkf6i18n6, libkf6service6, libkf6config6, libkf6kio6, libkf6activities6
+          Maintainer: Tyler Wagler <tyler.wagler@elytrondefense.com>
+          Description: PlasmaDock: Task manager with macOS-style dock zoom
+           A Plasma 6 task manager replacement featuring macOS-style icon zooming
+           and advanced window management.
+          Homepage: https://github.com/tylerwagler/PlasmaDock
+          EOF
+          
+          # Create postinst script for plasma reload
+          cat > deb-staging/DEBIAN/postinst << 'EOF'
+          #!/bin/bash
+          # Reload plasma shell to load the new plasmoid
+          if [ -n "$DEB_MAINTAINER_MODE" ]; then
+            echo "PlasmaDock installed successfully!"
+            echo "You can now add the PlasmaDock widget to your panel."
+          else
+            # Try to reload plasmashell if running
+            if pgrep -x plasmashell > /dev/null; then
+              killall plasmashell 2>/dev/null || true
+              sleep 1
+              kstart5 plasmashell &
+            fi
+            echo "PlasmaDock installed successfully!"
+            echo "You may need to log out and back in to see changes."
+          fi
+          exit 0
+          EOF
+          
+          chmod 755 deb-staging/DEBIAN/postinst
+          
+          # Create prerm script for cleanup
+          cat > deb-staging/DEBIAN/prerm << 'EOF'
+          #!/bin/bash
+          # Remove PlasmaDock from auto-start if needed
+          exit 0
+          EOF
+          
+          chmod 755 deb-staging/DEBIAN/prerm
+          
+          # Build the DEB package
+          dpkg-deb --build deb-staging plasmadock_${{ github.event.release.tag_name }}_amd64.deb
+          
+          # Also create a tarball for manual installation
+          tar -czf plasmadock_${{ github.event.release.tag_name }}_amd64.tar.gz -C deb-staging .
+
+      - name: Upload DEB Release Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            plasmadock_${{ github.event.release.tag_name }}_amd64.deb
+            plasmadock_${{ github.event.release.tag_name }}_amd64.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  package-rpm:
+    needs: build
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'release'
+
+    container:
+      image: fedora:40
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          dnf install -y \
+            cmake \
+            extra-cmake-modules \
+            gcc-c++ \
+            qt6-qtbase-devel \
+            qt6-qtdeclarative-devel \
+            qt6-qttools \
+            kf6-kconfig-devel \
+            kf6-kconfigwidgets-devel \
+            kf6-kcoreaddons-devel \
+            kf6-kcrash-devel \
+            kf6-ki18n-devel \
+            kf6-kio-devel \
+            kf6-knotifications-devel \
+            kf6-kwindowsystem-devel \
+            kf6-solid-devel \
+            kf6-plasma-devel \
+            kf6-ksysguard-devel \
+            rpm-build \
+            rpm-devel
+          
+          # Install remaining KDE dependencies
+          dnf install -y \
+            kf6-kbookmarks-devel \
+            kf6-knewstuff-devel \
+            kf6-kactivitymanagerd-devel || true
+
+      - name: Build
+        run: |
+          mkdir -p build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+          make -j$(nproc)
+
+      - name: Create RPM package
+        run: |
+          # Create directory structure for RPM
+          mkdir -p rpm-staging
+          cd build
+          
+          # Install to staging directory
+          make install DESTDIR=${{ github.workspace }}/rpm-staging
+          
+          # Create RPM build directories
+          mkdir -p rpm-build/RPMS/x86_64
+          mkdir -p rpm-build/SOURCES
+          mkdir -p rpm-build/SPECS
+          mkdir -p rpm-build/BUILD
+          
+          # Create spec file
+          cat > rpm-build/SPECS/plasmadock.spec << EOF
+          Name:           plasmadock
+          Version:        ${{ github.event.release.tag_name }}
+          Release:        1%{?dist}
+          Summary:        PlasmaDock: Task manager with macOS-style dock zoom
+          
+          License:        GPL-2.0-or-later
+          URL:            https://github.com/tylerwagler/PlasmaDock
+          
+          Requires:       plasma-desktop
+          Requires:       qt6-qtbase
+          Requires:       qt6-qtdeclarative
+          Requires:       kf6-kconfig
+          Requires:       kf6-ki18n
+          Requires:       kf6-kio
+          Requires:       kf6-kwindowsystem
+          Requires:       kf6-plasma
+          Requires:       kf6-kactivitymanagerd
+          
+          %description
+          PlasmaDock is a Plasma 6 task manager replacement featuring
+          macOS-style icon zooming and advanced window management.
+          
+          %prep
+          %setup -q
+          
+          %build
+          %cmake -DCMAKE_BUILD_TYPE=Release
+          %make_build
+          
+          %install
+          %make_install
+          
+          %files
+          /usr/share/plasma/plasmoids/org.plasmadock/
+          /usr/share/plasma/layout-templates/org.plasmadock.panel/
+          
+          %post
+          # Reload plasma shell if running
+          if pgrep -x plasmashell > /dev/null; then
+            killall plasmashell 2>/dev/null || true
+            sleep 1
+            kstart5 plasmashell &
+          fi
+          
+          %postun
+          # Cleanup on uninstall
+          exit 0
+          
+          %changelog
+          * $(date +"%a %b %d %Y") Tyler Wagler <tyler.wagler@elytrondefense.com> - ${{ github.event.release.tag_name }}
+          - Initial release
+          EOF
+          
+          # Copy installed files to RPM build directory
+          cp -r ${{ github.workspace }}/rpm-staging/* rpm-build/RPMS/x86_64/
+          
+          # Build the RPM package
+          cd rpm-build
+          rpmbuild -bb --define "_topdir $(pwd)" SPECS/plasmadock.spec
+          
+          # Copy RPM to output directory
+          cp RPMS/x86_64/plasmadock-${{ github.event.release.tag_name }}-1.*.x86_64.rpm ../..
+          
+          # Also create a tarball for manual installation
+          tar -czf plasmadock_${{ github.event.release.tag_name }}_x86_64.tar.gz -C rpm-staging .
+
+      - name: Upload RPM Release Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            plasmadock_${{ github.event.release.tag_name }}-1.*.x86_64.rpm
+            plasmadock_${{ github.event.release.tag_name }}_x86_64.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
