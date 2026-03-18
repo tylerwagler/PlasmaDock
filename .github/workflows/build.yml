@@ -36,10 +36,15 @@ jobs:
             libkf6bookmarks-dev \
             libkf6windowsystem-dev \
             libkf6solid-dev \
-            plasma-framework-dev \
-            libkf6activities-dev \
+            libkf6package-dev \
             libkf6newstuff-dev \
-            libksysguard-dev
+            libkf6activities-dev \
+            libksysguard-dev \
+            libplasma6-dev \
+            plasma-activities-dev \
+            plasma-activities-stats-dev \
+            plasma-workspace-dev \
+            libkf6itemmodels-dev
 
       - name: Configure CMake
         run: |
@@ -88,10 +93,15 @@ jobs:
             libkf6bookmarks-dev \
             libkf6windowsystem-dev \
             libkf6solid-dev \
-            plasma-framework-dev \
-            libkf6activities-dev \
+            libkf6package-dev \
             libkf6newstuff-dev \
+            libkf6activities-dev \
             libksysguard-dev \
+            libplasma6-dev \
+            plasma-activities-dev \
+            plasma-activities-stats-dev \
+            plasma-workspace-dev \
+            libkf6itemmodels-dev \
             dpkg-dev
 
       - name: Build
