@@ -24,23 +24,26 @@ jobs:
             extra-cmake-modules \
             build-essential \
             qt6-base-dev \
+            qt6-base-private-dev \
             qt6-declarative-dev \
             qt6-tools-dev \
-            libqt6dbus6 \
+            libkf6coreaddons-dev \
             libkf6i18n-dev \
             libkf6service-dev \
+            libkf6windowsystem-dev \
             libkf6config-dev \
             libkf6configwidgets-dev \
             libkf6notifications-dev \
             libkf6kio-dev \
             libkf6bookmarks-dev \
-            libkf6windowsystem-dev \
-            libkf6solid-dev \
-            libkf6package-dev \
-            libkf6newstuff-dev \
-            libkf6activities-dev \
+            libkf6itemmodels-dev \
+            libplasma-dev \
+            plasma-activities-dev \
+            plasma-activities-stats-dev \
+            plasma-workspace-dev \
             libksysguard-dev \
-            libkf6itemmodels-dev
+            libepoxy-dev \
+            libdrm-dev
 
       - name: Configure CMake
         run: |
