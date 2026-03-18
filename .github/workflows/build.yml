@@ -18,8 +18,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          apt-get update
-          apt-get install -y \
+          sudo apt-get update
+          sudo apt-get install -y \
             cmake \
             extra-cmake-modules \
             build-essential \
@@ -74,15 +74,16 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          apt-get update
-          apt-get install -y \
+          sudo apt-get update
+          sudo apt-get install -y \
             cmake \
             extra-cmake-modules \
             build-essential \
             qt6-base-dev \
+            qt6-base-private-dev \
             qt6-declarative-dev \
             qt6-tools-dev \
-            libqt6dbus6 \
+            libkf6coreaddons-dev \
             libkf6i18n-dev \
             libkf6service-dev \
             libkf6config-dev \
@@ -91,12 +92,14 @@ jobs:
             libkf6kio-dev \
             libkf6bookmarks-dev \
             libkf6windowsystem-dev \
-            libkf6solid-dev \
-            libkf6package-dev \
-            libkf6newstuff-dev \
-            libkf6activities-dev \
-            libksysguard-dev \
             libkf6itemmodels-dev \
+            libplasma-dev \
+            plasma-activities-dev \
+            plasma-activities-stats-dev \
+            plasma-workspace-dev \
+            libksysguard-dev \
+            libepoxy-dev \
+            libdrm-dev \
             dpkg-dev
 
       - name: Build
@@ -108,17 +111,12 @@ jobs:
 
       - name: Create DEB package
         run: |
-          # Create package directory structure
           mkdir -p deb-staging
           cd build
-          
-          # Install to staging directory
           make install DESTDIR=${{ github.workspace }}/deb-staging
           
-          # Create DEB directory structure
           mkdir -p deb-staging/DEBIAN
           
-          # Create control file
           cat > deb-staging/DEBIAN/control << EOF
           Package: plasmadock
           Version: ${{ github.event.release.tag_name }}
@@ -133,15 +131,12 @@ jobs:
           Homepage: https://github.com/tylerwagler/PlasmaDock
           EOF
           
-          # Create postinst script for plasma reload
           cat > deb-staging/DEBIAN/postinst << 'EOF'
           #!/bin/bash
-          # Reload plasma shell to load the new plasmoid
           if [ -n "$DEB_MAINTAINER_MODE" ]; then
             echo "PlasmaDock installed successfully!"
             echo "You can now add the PlasmaDock widget to your panel."
           else
-            # Try to reload plasmashell if running
             if pgrep -x plasmashell > /dev/null; then
               killall plasmashell 2>/dev/null || true
               sleep 1
@@ -155,19 +150,14 @@ jobs:
           
           chmod 755 deb-staging/DEBIAN/postinst
           
-          # Create prerm script for cleanup
           cat > deb-staging/DEBIAN/prerm << 'EOF'
           #!/bin/bash
-          # Remove PlasmaDock from auto-start if needed
           exit 0
           EOF
           
           chmod 755 deb-staging/DEBIAN/prerm
           
-          # Build the DEB package
           dpkg-deb --build deb-staging plasmadock_${{ github.event.release.tag_name }}_amd64.deb
-          
-          # Also create a tarball for manual installation
           tar -czf plasmadock_${{ github.event.release.tag_name }}_amd64.tar.gz -C deb-staging .
 
       - name: Upload DEB Release Asset
@@ -193,7 +183,7 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          dnf install -y \
+          sudo dnf install -y \
             cmake \
             extra-cmake-modules \
             gcc-c++ \
@@ -212,10 +202,7 @@ jobs:
             kf6-plasma-devel \
             kf6-ksysguard-devel \
             rpm-build \
-            rpm-devel
-          
-          # Install remaining KDE dependencies
-          dnf install -y \
+            rpm-devel \
             kf6-kbookmarks-devel \
             kf6-knewstuff-devel \
             kf6-kactivitymanagerd-devel || true
@@ -229,20 +216,15 @@ jobs:
 
       - name: Create RPM package
         run: |
-          # Create directory structure for RPM
           mkdir -p rpm-staging
           cd build
-          
-          # Install to staging directory
           make install DESTDIR=${{ github.workspace }}/rpm-staging
           
-          # Create RPM build directories
           mkdir -p rpm-build/RPMS/x86_64
           mkdir -p rpm-build/SOURCES
           mkdir -p rpm-build/SPECS
           mkdir -p rpm-build/BUILD
           
-          # Create spec file
           cat > rpm-build/SPECS/plasmadock.spec << EOF
           Name:           plasmadock
           Version:        ${{ github.event.release.tag_name }}
@@ -281,7 +263,6 @@ jobs:
           /usr/share/plasma/layout-templates/org.plasmadock.panel/
           
           %post
-          # Reload plasma shell if running
           if pgrep -x plasmashell > /dev/null; then
             killall plasmashell 2>/dev/null || true
             sleep 1
@@ -289,7 +270,6 @@ jobs:
           fi
           
           %postun
-          # Cleanup on uninstall
           exit 0
           
           %changelog
@@ -297,17 +277,12 @@ jobs:
           - Initial release
           EOF
           
-          # Copy installed files to RPM build directory
           cp -r ${{ github.workspace }}/rpm-staging/* rpm-build/RPMS/x86_64/
           
-          # Build the RPM package
           cd rpm-build
           rpmbuild -bb --define "_topdir $(pwd)" SPECS/plasmadock.spec
           
-          # Copy RPM to output directory
           cp RPMS/x86_64/plasmadock-${{ github.event.release.tag_name }}-1.*.x86_64.rpm ../..
-          
-          # Also create a tarball for manual installation
           tar -czf plasmadock_${{ github.event.release.tag_name }}_x86_64.tar.gz -C rpm-staging .
 
       - name: Upload RPM Release Asset
