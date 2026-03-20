@@ -31,9 +31,8 @@ install(DIRECTORY layout-templates/
         DESTINATION ${KDE_INSTALL_DATADIR}/plasma/layout-templates/org.plasmadock.panel
 )
 
-# Add tests (only when building from source, not during installation)
-option(BUILD_TESTING "Build unit tests" OFF)
-if(BUILD_TESTING)
+# Tests — ECM enables BUILD_TESTING by default; only add if dir exists
+if(BUILD_TESTING AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests")
     message(STATUS "Building tests")
     add_subdirectory(tests)
 endif()
