@@ -130,13 +130,16 @@ jobs:
 
       - name: Create DEB package
         run: |
-          mkdir -p deb-staging
+          DEB_STAGING="${{ github.workspace }}/deb-staging"
+          DEB_OUT="${{ github.workspace }}/deb-out"
+          mkdir -p "${DEB_STAGING}" "${DEB_OUT}"
+
           cd build
-          make install DESTDIR=${{ github.workspace }}/deb-staging
-          
-          mkdir -p deb-staging/DEBIAN
-          
-          cat > deb-staging/DEBIAN/control << EOF
+          make install DESTDIR="${DEB_STAGING}"
+
+          mkdir -p "${DEB_STAGING}/DEBIAN"
+
+          cat > "${DEB_STAGING}/DEBIAN/control" << EOF
           Package: plasmadock
           Version: ${GITHUB_REF_NAME#v}
           Section: kde
@@ -149,8 +152,8 @@ jobs:
            and advanced window management.
           Homepage: https://github.com/tylerwagler/PlasmaDock
           EOF
-          
-          cat > deb-staging/DEBIAN/postinst << 'EOF'
+
+          cat > "${DEB_STAGING}/DEBIAN/postinst" << 'EOF'
           #!/bin/bash
           echo "PlasmaDock installed successfully!"
           if pgrep -x plasmashell > /dev/null; then
@@ -160,26 +163,27 @@ jobs:
           fi
           exit 0
           EOF
-          
-          chmod 755 deb-staging/DEBIAN/postinst
-          
-          cat > deb-staging/DEBIAN/prerm << 'EOF'
+
+          chmod 755 "${DEB_STAGING}/DEBIAN/postinst"
+
+          cat > "${DEB_STAGING}/DEBIAN/prerm" << 'EOF'
           #!/bin/bash
           exit 0
           EOF
-          
-          chmod 755 deb-staging/DEBIAN/prerm
-          
+
+          chmod 755 "${DEB_STAGING}/DEBIAN/prerm"
+
           DEB_ARCH=$(dpkg --print-architecture)
-          dpkg-deb --build deb-staging plasmadock_${GITHUB_REF_NAME#v}_${DEB_ARCH}.deb
-          tar -czf plasmadock_${GITHUB_REF_NAME#v}_${DEB_ARCH}.tar.gz -C deb-staging .
+          VERSION="${GITHUB_REF_NAME#v}"
+          dpkg-deb --build "${DEB_STAGING}" "${DEB_OUT}/plasmadock_${VERSION}_${DEB_ARCH}.deb"
+          tar -czf "${DEB_OUT}/plasmadock_${VERSION}_${DEB_ARCH}.tar.gz" -C "${DEB_STAGING}" .
 
       - name: Upload DEB Release Asset
         uses: softprops/action-gh-release@v2.2.2
         with:
           files: |
-            plasmadock_*.deb
-            plasmadock_*.tar.gz
+            deb-out/plasmadock_*.deb
+            deb-out/plasmadock_*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -299,14 +303,16 @@ jobs:
             --define "_buildroot_staging ${RPM_BUILDROOT}" \
             ${RPM_TOPDIR}/SPECS/plasmadock.spec
 
-          cp ${RPM_TOPDIR}/RPMS/x86_64/plasmadock-${VERSION}-1.*.x86_64.rpm .
-          tar -czf plasmadock_${VERSION}_x86_64.tar.gz -C ${RPM_BUILDROOT} .
+          RPM_OUT="${{ github.workspace }}/rpm-out"
+          mkdir -p "${RPM_OUT}"
+          cp ${RPM_TOPDIR}/RPMS/x86_64/plasmadock-*.rpm "${RPM_OUT}/"
+          tar -czf "${RPM_OUT}/plasmadock_${VERSION}_x86_64.tar.gz" -C ${RPM_BUILDROOT} .
 
       - name: Upload RPM Release Asset
         uses: softprops/action-gh-release@v2.2.2
         with:
           files: |
-            plasmadock-${GITHUB_REF_NAME#v}-1.*.x86_64.rpm
-            plasmadock_${GITHUB_REF_NAME#v}_x86_64.tar.gz
+            rpm-out/plasmadock-*.rpm
+            rpm-out/plasmadock_*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
