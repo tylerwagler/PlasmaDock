@@ -37,7 +37,9 @@ ColumnLayout {
     property bool hasTrackInATitle: false
     property int orientation: ListView.Vertical // vertical for compact single-window tooltips
 
-    // HACK: Avoid blank space in the tooltip after closing a window
+    // Note: This workaround prevents blank space in the tooltip after closing a window
+    // by immediately unloading the component. A more robust solution would involve
+    // proper lifecycle management of tooltip content.
     ListView.onPooled: width = height = 0
     ListView.onReused: width = height = undefined
 

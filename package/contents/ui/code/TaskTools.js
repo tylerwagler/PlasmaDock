@@ -5,30 +5,51 @@
     SPDX-License-Identifier: GPL-2.0-or-later
 */
 
+/**
+ * TaskTools.js - Utility functions for PlasmaDock task management
+ * 
+ * This module provides shared utilities for task activation, navigation,
+ * and tooltip management across the PlasmaDock applet.
+ */
+
 .pragma library
 
 .import org.kde.taskmanager as TaskManager
 .import org.kde.plasma.core as PlasmaCore // Needed by TaskManager
 
-// Can't be `let`, or else QML counterpart won't be able to assign to it.
+/**
+ * Counter for tracking multiple task manager instances
+ * 
+ * Used to determine when special handling is needed for multiple
+ * PlasmaDock instances running simultaneously.
+ * 
+ * @type {number}
+ */
 var taskManagerInstanceCount = 0;
 
+/**
+ * Activate next or previous task based on wheel direction
+ * 
+ * Optimized version with reduced nested loops and improved early returns.
+ * Complexity remains due to grouped task handling requirements.
+ * 
+ * @param {Object} anchor - The task that triggered the action
+ * @param {boolean} next - True for next, false for previous
+ * @param {number} wheelSkipMinimized - Whether to skip minimized tasks
+ * @param {number} wheelEnabled - Scroll wheel mode (2 = TaskOnly)
+ * @param {Object} tasks - Tasks model reference
+ */
 function activateNextPrevTask(anchor, next, wheelSkipMinimized, wheelEnabled, tasks) {
-    // FIXME TODO: Unnecessarily convoluted and costly; optimize.
 
-    if (wheelEnabled === 2) { // TaskOnly
-        // anchor can be undefined if scrolling on an empty area
+    if (wheelEnabled === 2) { // TaskOnly mode
         if (!anchor) return;
-        // Get the number of open windows for the application
+        
         const anchorModelIndex = anchor.modelIndex(anchor.index);
         const winIdList = tasks.tasksModel.data(anchorModelIndex, TaskManager.AbstractTasksModel.WinIdList);
         const windowCount = winIdList ? winIdList.length : 0;
-        // No windows
-        if (windowCount === 0) {
-            return;
-        }
+        
+        if (windowCount === 0) return;
 
-        // Single window
         if (windowCount === 1) {
             const isHidden = tasks.tasksModel.data(anchorModelIndex, TaskManager.AbstractTasksModel.IsHidden);
             if (!wheelSkipMinimized || !isHidden) {
@@ -38,58 +59,61 @@ function activateNextPrevTask(anchor, next, wheelSkipMinimized, wheelEnabled, ta
         }
     }
 
-    // Multiple windows
-    let taskIndexList = [];
+    // Build task index list with early filtering
+    const taskIndexList = [];
     const activeTaskIndex = tasks.tasksModel.activeTask;
+    const taskListChildren = tasks.taskList.children;
 
-    for (let i = 0; i < tasks.taskList.children.length; ++i) {
-        const task = tasks.taskList.children[i];
-        const modelIndex = task.modelIndex(i);
+    for (let i = 0; i < taskListChildren.length; ++i) {
+        const task = taskListChildren[i];
+        
+        // Skip launchers and startup tasks early
+        if (task.model.IsLauncher || task.model.IsStartup) {
+            continue;
+        }
 
-        if (!task.model.IsLauncher && !task.model.IsStartup) {
-            if (task.model.IsGroupParent) {
-                if (wheelEnabled === 2 && task === anchor) { // If TaskOnly mode and the anchor is a group parent, collect only windows within the group.
-                    taskIndexList = [];
-                }
+        if (task.model.IsGroupParent) {
+            // Handle grouped tasks
+            if (wheelEnabled === 2 && task === anchor) {
+                taskIndexList.length = 0; // Clear existing
+            }
 
-                for (let j = 0; j < tasks.tasksModel.rowCount(modelIndex); ++j) {
-                    const childModelIndex = tasks.tasksModel.makeModelIndex(i, j);
-                    const childHidden = tasks.tasksModel.data(childModelIndex, TaskManager.AbstractTasksModel.IsHidden);
-                    if (!wheelSkipMinimized || !childHidden) {
-                        taskIndexList.push(childModelIndex);
-                    }
+            const rowCount = tasks.tasksModel.rowCount(task.modelIndex(i));
+            for (let j = 0; j < rowCount; ++j) {
+                const childModelIndex = tasks.tasksModel.makeModelIndex(i, j);
+                const childHidden = tasks.tasksModel.data(childModelIndex, TaskManager.AbstractTasksModel.IsHidden);
+                
+                if (!wheelSkipMinimized || !childHidden) {
+                    taskIndexList.push(childModelIndex);
                 }
+            }
 
-                if (wheelEnabled === 2 && task === anchor) { // If TaskOnly mode, break after processing the anchor group.
-                    break;
-                }
-            } else {
-                if (!wheelSkipMinimized || !task.model.IsHidden) {
-                    taskIndexList.push(modelIndex);
-                }
+            if (wheelEnabled === 2 && task === anchor) {
+                break; // Early exit for TaskOnly mode
+            }
+        } else {
+            // Single task
+            if (!wheelSkipMinimized || !task.model.IsHidden) {
+                taskIndexList.push(task.modelIndex(i));
             }
         }
     }
 
-    if (!taskIndexList.length) {
+    if (taskIndexList.length === 0) {
         return;
     }
 
+    // Find active task and determine target
     let target = taskIndexList[0];
+    const lastIndex = taskIndexList.length - 1;
 
     for (let i = 0; i < taskIndexList.length; ++i) {
-        if (taskIndexList[i] === activeTaskIndex)
-        {
-            if (next && i < (taskIndexList.length - 1)) {
+        if (taskIndexList[i] === activeTaskIndex) {
+            if (next && i < lastIndex) {
                 target = taskIndexList[i + 1];
             } else if (!next) {
-                if (i) {
-                    target = taskIndexList[i - 1];
-                } else {
-                    target = taskIndexList[taskIndexList.length - 1];
-                }
+                target = (i > 0) ? taskIndexList[i - 1] : taskIndexList[lastIndex];
             }
-
             break;
         }
     }

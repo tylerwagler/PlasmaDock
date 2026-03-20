@@ -27,7 +27,7 @@ Build-Depends:
  libepoxy-dev,
  libdrm-dev,
 Standards-Version: 4.6.2
-Homepage: https://github.com/vickoc911/org.vicko.plasmadock
+Homepage: https://github.com/tylerwagler/PlasmaDock
 Rules-Requires-Root: no
 
 Package: plasmadock

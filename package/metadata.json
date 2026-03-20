@@ -18,7 +18,7 @@
         "Id": "org.plasmadock",
         "License": "GPL-2.0-or-later",
         "Name": "PlasmaDock",
-        "Website": "https://github.com/vickoc911/org.plasmadock"
+        "Website": "https://github.com/tylerwagler/PlasmaDock"
     },
     "X-Plasma-API-Minimum-Version": "6.0",
     "X-Plasma-Provides": [

@@ -555,21 +555,23 @@ PlasmoidItem {
 
                 Item {
                     id: dockContainer
-                    anchors.fill: parent
+                    width: taskList.width
+                    height: taskList.height
 
                     property real smoothMouseX: -1
                     property bool insideDock: false
                     property alias animating: taskList.animating
+                    property int taskCount: taskRepeater.count
 
                     HoverHandler {
                         id: dockHoverHandler
 
                         onPointChanged: {
-                            let mappedPos = dockContainer.mapToItem(tasks, point.position.x, point.position.y);
+                            let x = point.position.x;
                             if (dockContainer.smoothMouseX < 0) {
-                                dockContainer.smoothMouseX = mappedPos.x;
+                                dockContainer.smoothMouseX = x;
                             } else {
-                                dockContainer.smoothMouseX = dockContainer.smoothMouseX + (mappedPos.x - dockContainer.smoothMouseX) * 0.3;
+                                dockContainer.smoothMouseX += (x - dockContainer.smoothMouseX) * 0.3;
                             }
                             dockContainer.insideDock = true;
                         }
@@ -647,8 +649,11 @@ PlasmoidItem {
         const initialArgs = Object.assign(args, {
             visualParent: rootTask,
             modelIndex,
+            tasksModel,
             mpris2Source,
             backend,
+            virtualDesktopInfo,
+            activityInfo,
         });
         return contextMenuComponent.createObject(rootTask, initialArgs);
     }

@@ -160,7 +160,7 @@ Example:
 ### Error Handling
 - Check validity of objects returned from factories (e.g., `KService::Ptr`)
 - Validate URLs and file paths before use
-- Use `qCWarning()` and `qCDebug()` for logging with category `WAVETASK_DEBUG`
+- Use `qCWarning()` and `qCDebug()` for logging with category `PLASMADOCK_DEBUG`
 - Return early on invalid conditions (guard clauses)
 - For QML-invokable methods, return appropriate empty values on error
 

@@ -20,7 +20,9 @@ QtObject {
     // It's a JS object so we can do key lookup and don't need to take care of filtering duplicates.
     property var pidMatches: new Set()
 
-    // TODO Evict cache at some point, preferably if all instances of an application closed.
+    // Note: Stream cache is maintained for the session.
+    // Optimization opportunity: Implement cache eviction when all instances
+    // of an application are closed to reduce memory usage in long sessions.
     function registerPidMatch(appName: string) {
         if (!hasPidMatch(appName)) {
             pidMatches.add(appName);

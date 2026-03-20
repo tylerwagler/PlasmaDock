@@ -8,13 +8,16 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -78,7 +81,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Install build dependencies
         run: |
@@ -138,8 +141,8 @@ jobs:
           Version: ${GITHUB_REF_NAME#v}
           Section: kde
           Priority: optional
-          Architecture: amd64
-          Depends: plasma-desktop, qt6-base, qt6-declarative, kf6-ki18n, kf6-kservice, kf6-kconfig, kf6-kio, kf6-kactivities
+          Architecture: $(dpkg --print-architecture)
+          Depends: plasma-desktop, qt6-base, qt6-declarative, kf6-ki18n, kf6-kservice, kf6-kconfig, kf6-kio, kf6-kactivities, kf6-kwindowsystem, kf6-kitemmodels, libplasma, kf6-kbookmarks
           Maintainer: Tyler Wagler <tyler.wagler@elytrondefense.com>
           Description: PlasmaDock: Task manager with macOS-style dock zoom
            A Plasma 6 task manager replacement featuring macOS-style icon zooming
@@ -149,16 +152,10 @@ jobs:
           
           cat > deb-staging/DEBIAN/postinst << 'EOF'
           #!/bin/bash
-          if [ -n "$DEB_MAINTAINER_MODE" ]; then
-            echo "PlasmaDock installed successfully!"
-            echo "You can now add the PlasmaDock widget to your panel."
+          echo "PlasmaDock installed successfully!"
+          if pgrep -x plasmashell > /dev/null; then
+            plasmashell --replace &disown
           else
-            if pgrep -x plasmashell > /dev/null; then
-              killall plasmashell 2>/dev/null || true
-              sleep 1
-              kstart5 plasmashell &
-            fi
-            echo "PlasmaDock installed successfully!"
             echo "You may need to log out and back in to see changes."
           fi
           exit 0
@@ -173,15 +170,16 @@ jobs:
           
           chmod 755 deb-staging/DEBIAN/prerm
           
-          dpkg-deb --build deb-staging plasmadock_${GITHUB_REF_NAME#v}_amd64.deb
-          tar -czf plasmadock_${GITHUB_REF_NAME#v}_amd64.tar.gz -C deb-staging .
+          DEB_ARCH=$(dpkg --print-architecture)
+          dpkg-deb --build deb-staging plasmadock_${GITHUB_REF_NAME#v}_${DEB_ARCH}.deb
+          tar -czf plasmadock_${GITHUB_REF_NAME#v}_${DEB_ARCH}.tar.gz -C deb-staging .
 
       - name: Upload DEB Release Asset
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.2.2
         with:
           files: |
-            plasmadock_${GITHUB_REF_NAME#v}_amd64.deb
-            plasmadock_${GITHUB_REF_NAME#v}_amd64.tar.gz
+            plasmadock_*.deb
+            plasmadock_*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -195,7 +193,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Install build dependencies
         run: |
@@ -204,26 +202,27 @@ jobs:
             extra-cmake-modules \
             gcc-c++ \
             qt6-qtbase-devel \
+            qt6-qtbase-private-devel \
             qt6-qtdeclarative-devel \
-            qt6-qttools \
-            kf5-kconfig-devel \
-            kf5-kconfigwidgets-devel \
-            kf5-kcoreaddons-devel \
-            kf5-kcrash-devel \
-            kf5-ki18n-devel \
-            kf5-kio-devel \
-            kf5-knotifications-devel \
-            kf5-kwindowsystem-devel \
-            kf5-solid-devel \
-            kf5-plasma-devel \
-            kf5-ksysguard-devel \
+            qt6-qttools-devel \
+            kf6-kcoreaddons-devel \
+            kf6-kconfig-devel \
+            kf6-kconfigwidgets-devel \
+            kf6-kcrash-devel \
+            kf6-ki18n-devel \
+            kf6-kio-devel \
+            kf6-knotifications-devel \
+            kf6-kwindowsystem-devel \
+            kf6-solid-devel \
+            kf6-plasma-devel \
+            kf6-ksysguard-devel \
+            kf6-kbookmarks-devel \
+            kf6-knewstuff-devel \
+            kf6-kactivities-devel \
+            kf6-kservice-devel \
+            kf6-kitemmodels-devel \
             rpm-build \
-            rpm-devel \
-            kf5-kbookmarks-devel \
-            kf5-knewstuff-devel \
-            kf5-kactivities-devel \
-            libksysguard-devel \
-            qt6-base-private-devel
+            rpm-devel
 
       - name: Build
         run: |
@@ -255,12 +254,16 @@ jobs:
           Requires:       plasma-desktop
           Requires:       qt6-qtbase
           Requires:       qt6-qtdeclarative
-          Requires:       kf5-kconfig
-          Requires:       kf5-ki18n
-          Requires:       kf5-kio
-          Requires:       kf5-kwindowsystem
-          Requires:       kf5-plasma
-          Requires:       kf5-kactivities
+          Requires:       kf6-kconfig
+          Requires:       kf6-ki18n
+          Requires:       kf6-kio
+          Requires:       kf6-kwindowsystem
+          Requires:       kf6-plasma
+          Requires:       kf6-kactivities
+          Requires:       kf6-kservice
+          Requires:       kf6-kbookmarks
+          Requires:       kf6-kitemmodels
+          Requires:       kf6-ksysguard
           
           %description
           PlasmaDock is a Plasma 6 task manager replacement featuring
@@ -282,9 +285,7 @@ jobs:
           
           %post
           if pgrep -x plasmashell > /dev/null; then
-            killall plasmashell 2>/dev/null || true
-            sleep 1
-            kstart5 plasmashell &
+            plasmashell --replace &disown
           fi
           
           %postun
@@ -304,7 +305,7 @@ jobs:
           tar -czf plasmadock_${GITHUB_REF_NAME#v}_x86_64.tar.gz -C rpm-staging .
 
       - name: Upload RPM Release Asset
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.2.2
         with:
           files: |
             plasmadock-${GITHUB_REF_NAME#v}-1.*.x86_64.rpm

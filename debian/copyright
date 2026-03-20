@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: plasmadock
 Upstream-Contact: Tyler Wagler <tyler.wagler@elytrondefense.com>
-Source: https://github.com/vickoc911/org.plasmadock
+Source: https://github.com/tylerwagler/PlasmaDock
 
 Files: *
 Copyright: 2024-2026 Tyler Wagler <tyler.wagler@elytrondefense.com>

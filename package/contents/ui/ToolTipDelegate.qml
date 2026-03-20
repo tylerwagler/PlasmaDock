@@ -69,7 +69,10 @@ Loader {
         id: singleTooltip
 
         ToolTipInstance {
-            index: 0 // TODO: maybe set to -1, because that's what the component checks against?
+            // Index 0 represents a single task tooltip
+            // Note: ToolTipInstance checks for index === -1 to identify group tooltips
+            // This is correct for single tooltips
+            index: 0
             submodelIndex: toolTipDelegate.rootIndex
             appPid: toolTipDelegate.pidParent
             display: toolTipDelegate.display

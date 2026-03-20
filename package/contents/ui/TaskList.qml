@@ -37,6 +37,9 @@ GridLayout {
         }
 
         // The maximum number of stripes allowed by the applet's size
+        if (children.length === 0) {
+            return 1;
+        }
         const stripeSizeLimit = vertical
             ? Math.floor(parent.width / children[0].implicitWidth)
             : Math.floor(parent.height / children[0].implicitHeight)

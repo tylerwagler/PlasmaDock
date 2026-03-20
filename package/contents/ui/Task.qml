@@ -121,6 +121,8 @@ PlasmaCore.ToolTipArea {
     }
 
     // macOS-style zoom effect using Gaussian curve
+    // Uses stable (unzoomed) center position to avoid binding loop:
+    //   taskOffsets → task.x → mapToItem → zoomFactor → task.width → taskOffsets
     property real zoomFactor: {
         if (!dockRef || _amplitude <= 0) return 1.0;
         if (!dockRef.insideDock) return 1.0;
@@ -128,8 +130,10 @@ PlasmaCore.ToolTipArea {
         let mX = dockRef.smoothMouseX;
         if (mX < 0) return 1.0;
 
-        let centerInDock = task.mapToItem(dockRef, _baseSize / 2, 0).x;
-        let distance = Math.abs(mX - centerInDock);
+        let baseWidth = _baseSize + _taskWidthPadding;
+        let totalBaseWidth = dockRef.taskCount * baseWidth;
+        let stableCenter = (dockRef.width - totalBaseWidth) / 2 + index * baseWidth + baseWidth / 2;
+        let distance = Math.abs(mX - stableCenter);
 
         if (distance > _sigma * 3) return 1.0;
 
@@ -225,7 +229,7 @@ PlasmaCore.ToolTipArea {
 
     onChildCountChanged: {
         if (TaskTools.taskManagerInstanceCount < 2 && childCount > previousChildCount) {
-            tasksRoot.tasksModel.requestPublishDelegateGeometry(modelIndex(), backend.globalRect(task), task);
+            tasksRoot.tasksModel.requestPublishDelegateGeometry(modelIndex(), tasksRoot.backend.globalRect(task), task);
         }
 
         previousChildCount = childCount;
@@ -481,7 +485,7 @@ PlasmaCore.ToolTipArea {
                 } else if (Plasmoid.configuration.middleClickAction === TaskManagerApplet.Backend.ToggleGrouping) {
                     tasksRoot.tasksModel.requestToggleGrouping(modelIndex());
                 } else if (Plasmoid.configuration.middleClickAction === TaskManagerApplet.Backend.BringToCurrentDesktop) {
-                    tasksRoot.tasksModel.requestVirtualDesktops(modelIndex(), [virtualDesktopInfo.currentDesktop]);
+                    tasksRoot.tasksModel.requestVirtualDesktops(modelIndex(), [tasksRoot.tasksModel.virtualDesktop]);
                 }
             } else if (button === Qt.BackButton || button === Qt.ForwardButton) {
                 const playerData = mpris2Source.playerForLauncherUrl(task.model.LauncherUrlWithoutIcon, task.model.AppPid);

@@ -31,3 +31,10 @@ install(DIRECTORY layout-templates/
         DESTINATION ${KDE_INSTALL_DATADIR}/plasma/layout-templates/org.plasmadock.panel
 )
 
+# Add tests (only when building from source, not during installation)
+option(BUILD_TESTING "Build unit tests" OFF)
+if(BUILD_TESTING)
+    message(STATUS "Building tests")
+    add_subdirectory(tests)
+endif()
+

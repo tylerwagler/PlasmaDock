@@ -8,6 +8,7 @@ CTestTestfile.cmake
 install_manifest.txt
 
 # Build directories
+build/
 bin/
 lib/
 lib64/
@@ -34,14 +35,14 @@ plugin/meta_types/
 plugin/*_autogen/
 plugin/*.qrc
 plugin/*.qmltypes
-plugin/wavetask_autogen/
-plugin/wavetaskplugin_autogen/
+plugin/plasmadock_autogen/
+plugin/plasmadockplugin_autogen/
 
 # Generated source files
 plugin/log_settings.cpp
 plugin/kactivitymanagerd_plugins_settings.cpp
 plugin/kactivitymanagerd_plugins_settings.h
-plugin/wavetask_qmltyperegistrations.cpp
+plugin/plasmadock_qmltyperegistrations.cpp
 plugin/*_in.cpp
 
 # KDE/Qt installation prefixes

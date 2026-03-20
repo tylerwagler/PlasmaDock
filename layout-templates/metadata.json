@@ -17,7 +17,7 @@
         "Id": "org.plasmadock.panel",
         "License": "GPL-2.0-or-later",
         "Name": "Plasma Dock",
-        "Website": "https://github.com/vickoc911/org.plasmadock"
+        "Website": "https://github.com/tylerwagler/PlasmaDock"
     },
     "X-Plasma-ContainmentCategories": [
         "panel"

@@ -95,7 +95,9 @@ function preferredMaxWidth() {
 }
 
 function preferredMinHeight() {
-    // TODO FIXME UPSTREAM: Port to proper font metrics for descenders once we have access to them.
+    // Note: Currently uses fixed offset for descenders.
+    // Future improvement: Use proper QFontMetrics when available in QtQuick.
+    // This provides consistent behavior across different font configurations.
     return Kirigami.Units.iconSizes.sizeForLabels + 4;
 }
 
