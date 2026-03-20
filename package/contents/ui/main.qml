@@ -508,32 +508,45 @@ PlasmoidItem {
             TaskList {
                 id: taskList
 
-                // Extra width to prevent side clipping when edge icons zoom
-                readonly property real zoomOverflow: Plasmoid.configuration.iconSize * (Plasmoid.configuration.magnification / 100)
+                // Extra width to prevent side clipping when edge icons zoom.
+                // The zoom translate shifts the entire group outward by up to
+                // half the total visual expansion, so we need enough overflow
+                // on each side to accommodate that.
+                readonly property real zoomOverflow: {
+                    let iconSize = Plasmoid.configuration.iconSize;
+                    let amplitude = Plasmoid.configuration.magnification / 100;
+                    let baseWidth = iconSize + 6;
+                    let sigma = iconSize * 1.8;
+                    // Sum the Gaussian expansion across all tasks (worst case: mouse at center)
+                    let n = taskRepeater.count;
+                    let totalExpansion = 0;
+                    for (let i = 0; i < n; ++i) {
+                        let dist = Math.abs(i - (n - 1) / 2) * baseWidth;
+                        if (dist < sigma * 3) {
+                            totalExpansion += amplitude * Math.exp(-(dist * dist) / (2 * sigma * sigma)) * baseWidth;
+                        }
+                    }
+                    // Each side needs half the total expansion, plus the scaled icon overhang
+                    return totalExpansion / 2 + iconSize * amplitude;
+                }
 
                 width: Math.ceil(taskRepeater.count * (Plasmoid.configuration.iconSize + panelZoomPadding)) + zoomOverflow
                 height: tasks.height
 
-                // Total width of all icons for centering
-                readonly property real iconsTotalWidth: {
-                    let total = 0;
-                    for (let i = 0; i < taskRepeater.count; ++i) {
-                        let item = taskRepeater.itemAt(i);
-                        total += item ? item.width : Plasmoid.configuration.iconSize;
-                    }
-                    return total;
-                }
+                // Total width of all icons for centering (constant — width no longer varies with zoom)
+                readonly property real iconsTotalWidth: taskRepeater.count * (Plasmoid.configuration.iconSize + 6)
 
                 // Offset needed to center the icon block
                 readonly property real centerOffset: (width - iconsTotalWidth) / 2
 
-                // Precomputed cumulative X offsets for O(1) task positioning
+                // Cumulative X offsets — stable since task widths are constant.
+                // Only recomputed when task count or config changes.
                 property var taskOffsets: {
-                    let offsets = [centerOffset];
+                    let baseWidth = Plasmoid.configuration.iconSize + 6;
+                    let offsets = new Array(taskRepeater.count + 1);
+                    offsets[0] = centerOffset;
                     for (let i = 0; i < taskRepeater.count; ++i) {
-                        let item = taskRepeater.itemAt(i);
-                        let w = item ? item.width : Plasmoid.configuration.iconSize;
-                        offsets.push(offsets[offsets.length - 1] + w);
+                        offsets[i + 1] = offsets[i] + baseWidth;
                     }
                     return offsets;
                 }
@@ -562,6 +575,34 @@ PlasmoidItem {
                     property bool insideDock: false
                     property alias animating: taskList.animating
                     property int taskCount: taskRepeater.count
+
+                    // Precomputed per-task X translation for zoom visual expansion.
+                    // Reads each task's animated zoomFactor so translate and scale
+                    // stay perfectly in sync (no separate Behavior needed).
+                    // O(N) single pass, recomputed when any zoomFactor changes.
+                    readonly property var zoomTranslates: {
+                        let baseWidth = Plasmoid.configuration.iconSize + 6;
+                        let n = taskRepeater.count;
+                        let expansions = new Array(n);
+                        let totalExpansion = 0;
+                        for (let i = 0; i < n; ++i) {
+                            let item = taskRepeater.itemAt(i);
+                            let e = item ? (item.zoomFactor - 1) * baseWidth : 0;
+                            expansions[i] = e;
+                            totalExpansion += e;
+                        }
+                        let halfExpansion = totalExpansion / 2;
+                        let offsets = new Array(n);
+                        let cumulative = 0;
+                        for (let i = 0; i < n; ++i) {
+                            // Center the expansion: shift left by half, then add
+                            // cumulative expansion of all tasks before this one,
+                            // plus half this task's own expansion (center anchor).
+                            offsets[i] = -halfExpansion + cumulative + expansions[i] / 2;
+                            cumulative += expansions[i];
+                        }
+                        return offsets;
+                    }
 
                     HoverHandler {
                         id: dockHoverHandler
@@ -608,7 +649,9 @@ PlasmoidItem {
 
                             x: taskList.taskOffsets[index] ?? taskList.centerOffset
 
-                            width: (Plasmoid.configuration.iconSize * zoomFactor) + 6
+                            // Constant width — zoom is purely visual via iconBox.scale
+                            // and dockContainer.zoomTranslates (GPU transforms, no relayout)
+                            width: Plasmoid.configuration.iconSize + 6
                         }
                     }
                 }

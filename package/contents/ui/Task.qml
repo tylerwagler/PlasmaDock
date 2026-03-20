@@ -114,15 +114,21 @@ PlasmaCore.ToolTipArea {
     z: taskDragHandler.active ? 1000 : 0
     property real _dragStartSceneX: 0
     property real _dragStartTaskX: 0
+
+    // Zoom expansion translate — read from the shared precomputed array.
+    // Derived from animated zoomFactor values so it stays in sync with
+    // iconBox.scale without needing its own Behavior animation.
+    readonly property real _zoomTranslateX: dockRef ? (dockRef.zoomTranslates[index] ?? 0) : 0
+
     transform: Translate {
-        x: taskDragHandler.active
+        x: (taskDragHandler.active
             ? taskDragHandler.centroid.scenePosition.x - task._dragStartSceneX + task._dragStartTaskX - task.x
-            : 0
+            : 0) + task._zoomTranslateX
     }
 
-    // macOS-style zoom effect using Gaussian curve
-    // Uses stable (unzoomed) center position to avoid binding loop:
-    //   taskOffsets → task.x → mapToItem → zoomFactor → task.width → taskOffsets
+    // macOS-style zoom effect using Gaussian curve.
+    // Drives iconBox.scale (visual only) — task width stays constant.
+    // Position expansion is handled by dockContainer.zoomTranslates (GPU transforms).
     property real zoomFactor: {
         if (!dockRef || _amplitude <= 0) return 1.0;
         if (!dockRef.insideDock) return 1.0;
