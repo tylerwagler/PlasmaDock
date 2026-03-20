@@ -221,6 +221,11 @@ jobs:
             kf6-kactivities-devel \
             kf6-kservice-devel \
             kf6-kitemmodels-devel \
+            plasma-activities-devel \
+            plasma-activities-stats-devel \
+            plasma-workspace-devel \
+            libepoxy-devel \
+            libdrm-devel \
             rpm-build \
             rpm-devel
 
