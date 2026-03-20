@@ -247,15 +247,18 @@ jobs:
           mkdir -p rpm-build/SPECS
           mkdir -p rpm-build/BUILD
           
-          cat > rpm-build/SPECS/plasmadock.spec << EOF
+          RPM_BUILDROOT="${{ github.workspace }}/rpm-staging"
+          RPM_TOPDIR="${{ github.workspace }}/rpm-build"
+
+          cat > ${RPM_TOPDIR}/SPECS/plasmadock.spec << 'SPEC'
           Name:           plasmadock
-          Version:        ${GITHUB_REF_NAME#v}
+          Version:        %{_version}
           Release:        1%{?dist}
           Summary:        PlasmaDock: Task manager with macOS-style dock zoom
-          
+
           License:        GPL-2.0-or-later
           URL:            https://github.com/tylerwagler/PlasmaDock
-          
+
           Requires:       plasma-desktop
           Requires:       qt6-qtbase
           Requires:       qt6-qtdeclarative
@@ -269,45 +272,38 @@ jobs:
           Requires:       kf6-kbookmarks
           Requires:       kf6-kitemmodels
           Requires:       kf6-ksysguard
-          
+
           %description
           PlasmaDock is a Plasma 6 task manager replacement featuring
           macOS-style icon zooming and advanced window management.
-          
-          %prep
-          %setup -q
-          
-          %build
-          %cmake -DCMAKE_BUILD_TYPE=Release
-          %make_build
-          
+
+          # Skip prep/build — already built and installed to BUILDROOT
           %install
-          %make_install
-          
+          cp -a %{_buildroot_staging}/. %{buildroot}/
+
           %files
           /usr/share/plasma/plasmoids/org.plasmadock/
           /usr/share/plasma/layout-templates/org.plasmadock.panel/
-          
+          %{_libdir}/qt6/qml/org/plasmadock/
+
           %post
           if pgrep -x plasmashell > /dev/null; then
             plasmashell --replace &disown
           fi
-          
+
           %postun
           exit 0
-          
-          %changelog
-          * $(date +"%a %b %d %Y") Tyler Wagler <tyler.wagler@elytrondefense.com> - ${GITHUB_REF_NAME#v}
-          - Initial release
-          EOF
-          
-          cp -r ${{ github.workspace }}/rpm-staging/* rpm-build/RPMS/x86_64/
-          
-          cd rpm-build
-          rpmbuild -bb --define "_topdir $(pwd)" SPECS/plasmadock.spec
-          
-          cp RPMS/x86_64/plasmadock-${GITHUB_REF_NAME#v}-1.*.x86_64.rpm ../..
-          tar -czf plasmadock_${GITHUB_REF_NAME#v}_x86_64.tar.gz -C rpm-staging .
+          SPEC
+
+          VERSION="${GITHUB_REF_NAME#v}"
+          rpmbuild -bb \
+            --define "_topdir ${RPM_TOPDIR}" \
+            --define "_version ${VERSION}" \
+            --define "_buildroot_staging ${RPM_BUILDROOT}" \
+            ${RPM_TOPDIR}/SPECS/plasmadock.spec
+
+          cp ${RPM_TOPDIR}/RPMS/x86_64/plasmadock-${VERSION}-1.*.x86_64.rpm .
+          tar -czf plasmadock_${VERSION}_x86_64.tar.gz -C ${RPM_BUILDROOT} .
 
       - name: Upload RPM Release Asset
         uses: softprops/action-gh-release@v2.2.2
