@@ -215,7 +215,7 @@ jobs:
             kf6-kwindowsystem-devel \
             kf6-solid-devel \
             kf6-plasma-devel \
-            kf6-ksysguard-devel \
+            libksysguard-devel \
             kf6-kbookmarks-devel \
             kf6-knewstuff-devel \
             kf6-kactivities-devel \
