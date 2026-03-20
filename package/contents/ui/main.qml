@@ -575,6 +575,7 @@ PlasmoidItem {
                     property bool insideDock: false
                     property alias animating: taskList.animating
                     property int taskCount: taskRepeater.count
+                    property alias taskRepeater: taskRepeater
 
                     // Precomputed per-task X translation for zoom visual expansion.
                     // Reads each task's animated zoomFactor so translate and scale
@@ -648,6 +649,15 @@ PlasmoidItem {
                             dockRef: dockContainer
 
                             x: taskList.taskOffsets[index] ?? taskList.centerOffset
+
+                            // Animate non-dragged tasks sliding into their new position during reorder
+                            Behavior on x {
+                                enabled: !taskItem.taskDragActive && tasks.dragSource !== null
+                                NumberAnimation {
+                                    duration: 250
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
 
                             // Constant width — zoom is purely visual via iconBox.scale
                             // and dockContainer.zoomTranslates (GPU transforms, no relayout)

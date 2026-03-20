@@ -71,6 +71,7 @@ PlasmaCore.ToolTipArea {
     readonly property bool smartLauncherEnabled: !inPopup
     property QtObject smartLauncherItem: null
 
+    readonly property bool taskDragActive: taskDragHandler.active
     property Item audioStreamIcon: null
     property var audioStreams: []
     property bool delayAudioStreamIndicator: false
@@ -118,12 +119,13 @@ PlasmaCore.ToolTipArea {
     // Zoom expansion translate — read from the shared precomputed array.
     // Derived from animated zoomFactor values so it stays in sync with
     // iconBox.scale without needing its own Behavior animation.
-    readonly property real _zoomTranslateX: dockRef ? (dockRef.zoomTranslates[index] ?? 0) : 0
+    // Suppressed during drag so the dragged task follows the cursor cleanly.
+    readonly property real _zoomTranslateX: (!taskDragHandler.active && dockRef) ? (dockRef.zoomTranslates[index] ?? 0) : 0
 
     transform: Translate {
-        x: (taskDragHandler.active
+        x: taskDragHandler.active
             ? taskDragHandler.centroid.scenePosition.x - task._dragStartSceneX + task._dragStartTaskX - task.x
-            : 0) + task._zoomTranslateX
+            : task._zoomTranslateX
     }
 
     // macOS-style zoom effect using Gaussian curve.
@@ -423,8 +425,22 @@ PlasmaCore.ToolTipArea {
     on_DragLocalXChanged: {
         if (_dragLocalX < 0 || _moveCooldown) return;
         if (tasksRoot.tasksModel?.sortMode !== TaskManager.TasksModel.SortManual) return;
-        let target = dockRef.childAt(_dragLocalX, task.height / 2);
-        if (target && target !== task && target.index !== undefined && target.index !== index) {
+
+        // Find the target task by layout position, skipping the dragged task.
+        // childAt() can't be used here because it returns the dragged task
+        // (z:1000 + Translate makes its visual bounds follow the cursor).
+        let target = null;
+        let repeater = dockRef.taskRepeater;
+        for (let i = 0; i < repeater.count; ++i) {
+            let item = repeater.itemAt(i);
+            if (!item || item === task) continue;
+            if (_dragLocalX >= item.x && _dragLocalX < item.x + item.width) {
+                target = item;
+                break;
+            }
+        }
+
+        if (target && target.index !== undefined && target.index !== index) {
             tasksRoot.tasksModel.move(index, target.index);
             _moveCooldown = true;
             _moveCooldownTimer.restart();
