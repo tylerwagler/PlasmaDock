@@ -271,7 +271,7 @@ jobs:
           Requires:       kf6-kservice
           Requires:       kf6-kbookmarks
           Requires:       kf6-kitemmodels
-          Requires:       kf6-ksysguard
+          Requires:       libksysguard
 
           %description
           PlasmaDock is a Plasma 6 task manager replacement featuring
