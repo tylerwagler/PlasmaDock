@@ -238,17 +238,14 @@ jobs:
 
       - name: Create RPM package
         run: |
-          mkdir -p rpm-staging
-          cd build
-          make install DESTDIR=${{ github.workspace }}/rpm-staging
-          
-          mkdir -p rpm-build/RPMS/x86_64
-          mkdir -p rpm-build/SOURCES
-          mkdir -p rpm-build/SPECS
-          mkdir -p rpm-build/BUILD
-          
           RPM_BUILDROOT="${{ github.workspace }}/rpm-staging"
           RPM_TOPDIR="${{ github.workspace }}/rpm-build"
+
+          mkdir -p "${RPM_BUILDROOT}"
+          cd build
+          make install DESTDIR="${RPM_BUILDROOT}"
+
+          mkdir -p "${RPM_TOPDIR}"/{RPMS/x86_64,SOURCES,SPECS,BUILD}
 
           cat > ${RPM_TOPDIR}/SPECS/plasmadock.spec << 'SPEC'
           Name:           plasmadock
