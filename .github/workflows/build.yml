@@ -303,16 +303,14 @@ jobs:
             --define "_buildroot_staging ${RPM_BUILDROOT}" \
             ${RPM_TOPDIR}/SPECS/plasmadock.spec
 
-          RPM_OUT="${{ github.workspace }}/rpm-out"
-          mkdir -p "${RPM_OUT}"
-          cp ${RPM_TOPDIR}/RPMS/x86_64/plasmadock-*.rpm "${RPM_OUT}/"
-          tar -czf "${RPM_OUT}/plasmadock_${VERSION}_x86_64.tar.gz" -C ${RPM_BUILDROOT} .
+          cp ${RPM_TOPDIR}/RPMS/x86_64/plasmadock-*.rpm "${{ github.workspace }}/"
+          tar -czf "${{ github.workspace }}/plasmadock_${VERSION}_x86_64.tar.gz" -C ${RPM_BUILDROOT} .
 
       - name: Upload RPM Release Asset
         uses: softprops/action-gh-release@v2.2.2
         with:
           files: |
-            rpm-out/plasmadock-*.rpm
-            rpm-out/plasmadock_*.tar.gz
+            ${{ github.workspace }}/plasmadock-*.rpm
+            ${{ github.workspace }}/plasmadock_*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
